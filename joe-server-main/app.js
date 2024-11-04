@@ -2,9 +2,13 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const app = express();
+const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the newsletter routes
+app.use(express.json()); // This middleware is necessary for parsing JSON in the request body
 
 app.use(cors());
 app.use("/static", express.static("public"));
+
+app.use('/newsletter', newsletterRoutes); // Mount the newsletter routes under /newsletter
 app.use((req, res, next) => {
     console.log("----- HTTP Request -----");
     console.log(`Method: ${req.method}`); // HTTP Method
