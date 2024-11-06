@@ -6,7 +6,7 @@ const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the 
 app.use(express.json()); // This middleware is necessary for parsing JSON in the request body
 
 app.use(cors());
-app.use("/static", express.static("public"));
+app.use("/public", express.static("public"));
 
 app.use('/newsletter', newsletterRoutes); // Mount the newsletter routes under /newsletter
 app.use((req, res, next) => {
