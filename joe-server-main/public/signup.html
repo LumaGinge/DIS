@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+ <meta charset="UTF-8">
+ <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="./styles/global.css">
+ <title>JOE and The Juice</title>
+</head>
+
+<body>
+  <ul>
+    <li><img src="../public/img/joeLogo.svg" alt="Logo"></li>
+    <li><a href="./index.html" class="active">Home</a></li>
+    <li style="float:right"><a href="./signup.html">Signup</a></li>
+    <li style="float:right"><a href="./locations.html">Locations</a></li>
+    <li style="float:right"><a href="./orders.html">Orders</a></li>
+    <li style="float:right"><a href="./newsletter.html">Newsletter</a></li>
+    <li style="float:right"><a href="./menu.html">Menu</a></li>
+  </ul>
+ <div class="center">
+   <div id="registerContainer" class="container">
+     <h2>Create Account</h2>
+     <form id="registerForm">
+         <input type="text" id="firstName" placeholder="First Name" required autocomplete="given-name">
+         <input type="text" id="lastName" placeholder="Last Name" required autocomplete="family-name">
+         <input type="email" id="email" placeholder="Email" required autocomplete="email">
+         <input type="password" id="password" placeholder="Password" required autocomplete="new-password">
+         <div id="submitbutton">
+         <button type="submit">Sign Up</button>
+     </div>
+     </form>
+     <div id="bottom">
+     <p>Already have an account? <a href="../public/index.html">Login here</a></p>
+ </div>
+</body>
+
+
+<script src="./scripts/signup.js"></script>
+
+
+</html>
