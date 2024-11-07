@@ -18,7 +18,7 @@ document.getElementById('registerForm').addEventListener('submit', function(even
       if (data.error) {
           alert(`Error registering user: ${data.error}`);
       } else {
-        window.location.href = './index.html';
+        window.location.href = '/';
       }
   })
   .catch(error => {
