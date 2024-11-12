@@ -13,38 +13,8 @@ app.use(express.json()); // This middleware is necessary for parsing JSON in the
 app.use(cors());
 app.use("/static", express.static("public"));
 
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./DB/users.db'); // Path to the user database
-
-
-app.post('/api/signup', (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
-
-
-  // Basic validation to ensure all fields are filled
-  if (!firstName || !lastName || !email || !password) {
-    return res.json({ error: 'All fields are required' });
-  }
-
-
-  // SQL query to insert new user
-  const query = `INSERT INTO users (firstName, lastName, email, password) VALUES (?, ?, ?, ?)`;
-
-
-  db.run(query, [firstName, lastName, email, password], function (err) {
-    if (err) {
-      // Handle case where email might already be in use (unique constraint)
-      if (err.message.includes("UNIQUE constraint failed")) {
-        return res.json({ error: 'Email already in use' });
-      }
-      return res.json({ error: 'Error registering user' });
-    }
-    // Send success response
-    res.json({ success: true, userId: this.lastID });
-  });
-});
-
-
+const signupRoutes = require('./Routes/signupRoutes.js');
+app.use('/api', signupRoutes);
 
 app.use('/newsletter', newsletterRoutes); // Mount the newsletter routes under /newsletter
 app.use((req, res, next) => {
