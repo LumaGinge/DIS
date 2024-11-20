@@ -2,6 +2,23 @@ body {
   margin: 0px;
 }
 
+#index-page {
+  background: linear-gradient(to bottom, #f09bc1, white);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.welcomeText {
+  text-align: center;
+}
+
+.joelogobig {
+  width: 300px; 
+  height: auto; 
+  display: block; 
+  margin: 0 auto;
+}
+
 ul {
     font-family: Calibri;
     list-style-type: none;
