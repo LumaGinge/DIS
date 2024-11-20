@@ -4,6 +4,7 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
         email: document.getElementById('email').value,
+        phoneNumber: document.getElementById('phoneNumber').value,
         password: document.getElementById('password').value,
     };
    
