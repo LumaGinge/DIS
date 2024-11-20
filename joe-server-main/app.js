@@ -16,6 +16,9 @@ app.use("/static", express.static("public"));
 const signupRoutes = require('./Routes/signupRoutes.js');
 app.use('/api', signupRoutes);
 
+const loginRoutes = require('./Routes/loginRoutes.js');
+app.use('/api', loginRoutes);
+
 app.use('/newsletter', newsletterRoutes); // Mount the newsletter routes under /newsletter
 app.use((req, res, next) => {
   /*console.log("----- HTTP Request -----"); 
