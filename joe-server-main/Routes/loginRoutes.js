@@ -24,7 +24,23 @@ router.post('/login', (req, res) => {
       return res.status(401).json({ error: 'Invalid password' });
     }
 
-    res.json({ success: true, userId: user.id });
+    res.cookie(
+      'user',
+      JSON.stringify({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+      }), // Serialize the object to a JSON string
+      {
+        httpOnly: false, // Ensure the cookie is accessible by JavaScript
+        maxAge: 24 * 60 * 60 * 1000, // 1-day expiration
+        path: '/', // Ensure the cookie is available across all routes
+      }
+    );
+
+    // Respond with success
+    res.json({ success: true });
   });
 });
 

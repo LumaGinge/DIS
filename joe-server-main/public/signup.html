@@ -20,22 +20,35 @@
     <li style="float:right"><a href="./newsletter.html">Newsletter</a></li>
     <li style="float:right"><a href="./menu.html">Menu</a></li>
   </ul>
- <div class="center">
-   <div id="registerContainer" class="container">
-     <h2>Create Account</h2>
-     <form id="registerForm">
-         <input type="text" id="firstName" placeholder="First Name" required autocomplete="given-name">
-         <input type="text" id="lastName" placeholder="Last Name" required autocomplete="family-name">
-         <input type="email" id="email" placeholder="Email" required autocomplete="email">
-         <input type="password" id="password" placeholder="Password" required autocomplete="new-password">
-         <input type="tel" id="phoneNumber" placeholder="Phone Number" required autocomplete="tel">
-         <div id="submitbutton">
-         <button type="submit">Sign Up</button>
-     </div>
-     </form>
-     <div id="bottom">
-     <p>Already have an account? <a href="./login.html">Login here</a></p>
- </div>
+
+  <div class="center">
+    <!-- User Info Container -->
+    <div id="userInfoContainer" class="container" style="display: none;">
+      <h2>Welcome Back!</h2>
+      <p id="name"></p>
+      <p id="email"></p>
+      <p id="phone"></p>
+      <button id="logoutButton">Logout</button>
+    </div>
+
+    <!-- Signup Form Container -->
+    <div id="registerContainer" class="container">
+      <h2>Create Account</h2>
+      <form id="registerForm">
+        <input type="text" id="firstName" placeholder="First Name" required autocomplete="given-name">
+        <input type="text" id="lastName" placeholder="Last Name" required autocomplete="family-name">
+        <input type="email" id="email" placeholder="Email" required autocomplete="email">
+        <input type="password" id="password" placeholder="Password" required autocomplete="new-password">
+        <input type="tel" id="phoneNumber" placeholder="Phone Number" required autocomplete="tel">
+        <div id="submitbutton">
+          <button type="submit">Sign Up</button>
+        </div>
+      </form>
+      <div id="bottom">
+        <p>Already have an account? <a href="./login.html">Login here</a></p>
+      </div>
+    </div>
+  </div>
 </body>
 
 <script src="./scripts/signup.js"></script>

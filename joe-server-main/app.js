@@ -5,6 +5,7 @@ const http = require("http")
 const httpProxy = require("http-proxy")
 const responseTime = require('response-time')
 
+
 const app = express();
 
 const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the newsletter routes
@@ -12,6 +13,9 @@ app.use(express.json()); // This middleware is necessary for parsing JSON in the
 
 app.use(cors());
 app.use("/static", express.static("public"));
+
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 const signupRoutes = require('./Routes/signupRoutes.js');
 app.use('/api', signupRoutes);

@@ -10,6 +10,7 @@ document.getElementById('loginform').addEventListener('submit', function (event)
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(user),
+    credentials: 'include', // Ensures cookies are sent
   })
     .then(response => response.json())
     .then(data => {
@@ -18,7 +19,7 @@ document.getElementById('loginform').addEventListener('submit', function (event)
         errorMessage.style.display = 'block';
         errorMessage.textContent = `Error: ${data.error}`;
       } else {
-        window.location.href = '/';
+        window.location.href = 'signup.html';
       }
     })
     .catch(error => {
