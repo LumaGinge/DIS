@@ -3,6 +3,7 @@ require("dotenv").config();
 const app = require("express")();
 const bodyParser = require("body-parser");
 
+
 // Twilio API nøgler
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -10,10 +11,31 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 // Twilio client til afsendelse af velkomstbesked
 const client = require("twilio")(accountSid, authToken);
 
+// Telefonnummer du vil sende beskeden til
+const toPhoneNumber = "+4529860375";
+
+// Telefonnummer du sender beskeden fra (dit Twilio-nummer)
+const fromPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+// Beskedens indhold
+const messageBody = "Hej! Dette er en testbesked fra Twilio.";
+
+client.messages.create({
+    body: messageBody,
+    from: fromPhoneNumber,
+    to: toPhoneNumber
+}).then(message => console.log(`Message sent: ${message.sid}`))
+  .catch(error => console.error(`Failed to send message: ${error}`));
+
+
+/*
 // Twilio responses til webhook for opkald og beskeder
 const MessagingResponse = require("twilio").twiml.MessagingResponse;
 
+//Bruger body-parser til at parse body af POST requests til JSON format
+//Extended: false betyder at vi ikke tillader nested objects i body
 app.use(bodyParser.urlencoded({ extended: false }));
+
 
 // Endpoint for webhook til SMS beskeder
 app.post("/sms", twilio.webhook({ validate: false }), (req, res) => {
@@ -62,3 +84,4 @@ app.post("/sms", twilio.webhook({ validate: false }), (req, res) => {
     res.type("text/xml").send(twiml.toString());
 });
 
+*/
