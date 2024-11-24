@@ -1,69 +1,55 @@
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    height: 100vh;
-    margin: 0;
-    background-color: #f3f4f6;
-  }
-  
-  h1 {
-    color: #333;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  input[type="email"] {
-    padding: 10px;
-    margin: 10px 0;
-    width: 100%;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  button {
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    font-size: 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  button:hover {
-    background-color: #45a049;
-  }
-  
-  #message-box {
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 4px;
-    font-weight: bold;
-  }
-  
-  .success {
-    background-color: #e7f4e4;
-    color: #4CAF50;
-  }
-  
-  .error {
-    background-color: #fce4e4;
-    color: #e74c3c;
-  }
-  
-  
+/* General Form Styling */
+form {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Horizontally center children */
+  margin: 20px auto;
+  max-width: 400px;
+  padding: 20px;
+  background-color: white; /* Matches other page sections */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Field Styling */
+form input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+/* Centered Submit Button Styling */
+form button {
+  padding: 10px 30px;
+  background-color: #f7c1d9; /* Matches the theme colors */
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  text-align: center;
+  margin-top: 10px; /* Add space between input and button */
+}
+
+form button:hover {
+  background-color: #f088b7; /* Slightly darker hover effect */
+  transform: scale(1.05); /* Add hover scaling effect */
+}
+
+/* Headings and Text */
+h1 {
+  font-size: 2em;
+  color: #333;
+  text-align: center;
+}
+
+p {
+  font-size: 1.1em;
+  color: #666;
+  text-align: center;
+  margin-bottom: 20px;
+}

@@ -1,11 +1,14 @@
 document.getElementById('registerForm').addEventListener('submit', function(event) {
     event.preventDefault();
+    const countryCode = document.getElementById('countryCode').value;
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    const fullPhoneNumber = countryCode + phoneNumber;
 
     const user = {
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
         email: document.getElementById('email').value,
-        phoneNumber: document.getElementById('phoneNumber').value,
+        phoneNumber: fullPhoneNumber,
         password: document.getElementById('password').value,
     };
    

@@ -1,9 +1,30 @@
-// Routes/loginRoutes.js
 const express = require('express');
 const bcrypt = require('bcrypt'); // Import bcrypt for password comparison
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
+const twilio = require('twilio');
+require('dotenv').config();
+
 const db = new sqlite3.Database('./DB/users.db');
+
+// Twilio configuration
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const fromPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+// Initialize Twilio client
+const client = twilio(accountSid, authToken);
+
+// Function to send SMS
+const sendSms = (to, body) => {
+  client.messages.create({
+    body: body,
+    from: fromPhoneNumber,
+    to: to,
+  })
+  .then(message => console.log(`Message sent: ${message.sid}`))
+  .catch(error => console.error(`Failed to send message: ${error}`));
+};
 
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
@@ -30,6 +51,11 @@ router.post('/login', (req, res) => {
         return res.status(401).json({ error: 'Invalid password' });
       }
 
+      // Send SMS to the user's phone number upon successful login
+      const loginMessage = `Hello ${user.firstName}, you have successfully logged in to your account.`;
+      sendSms(user.phoneNumber, loginMessage);
+
+      // Set cookie with user information
       res.cookie(
         'user',
         JSON.stringify({
@@ -37,11 +63,11 @@ router.post('/login', (req, res) => {
           lastName: user.lastName,
           email: user.email,
           phoneNumber: user.phoneNumber,
-        }), // Serialize the object to a JSON string
+        }), 
         {
-          httpOnly: false, // Ensure the cookie is accessible by JavaScript
-          maxAge: 24 * 60 * 60 * 1000, // 1-day expiration
-          path: '/', // Ensure the cookie is available across all routes
+          httpOnly: false,
+          maxAge: 24 * 60 * 60 * 1000,
+          path: '/',
         }
       );
 
@@ -55,3 +81,4 @@ router.post('/login', (req, res) => {
 });
 
 module.exports = router;
+
