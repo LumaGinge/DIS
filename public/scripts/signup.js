@@ -1,5 +1,6 @@
 document.getElementById('registerForm').addEventListener('submit', function(event) {
     event.preventDefault();
+
     const user = {
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
@@ -8,33 +9,37 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         password: document.getElementById('password').value,
     };
    
+    console.log('User data:', user); // Log user data to debug
    
     fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
+      body: JSON.stringify(user),
   })
+      .then(response => response.json())
+      .then(data => {
+          if (data.error) {
+              alert(`Error registering user: ${data.error}`);
+          } else {
+              // Save user data in a cookie or localStorage
+              document.cookie = `user=${encodeURIComponent(JSON.stringify(user))}; path=/;`;
+              console.log('User stored in cookie:', user);
+              window.location.href = '/';
+          }
+      })
+      .catch(error => {
+          console.error('Registration error:', error);
+          alert('Error registering user. Please try again.');
+      });
   
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert(`Error registering user: ${data.error}`);
-        } else {
-          window.location.href = '/';
-        }
-    })
-    .catch(error => {
-        console.error('Registration error:', error);
-        alert("Error registering user. Please try again.");
-    });
    });
- 
+  
    function logoutUser() {
     document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     alert('You have been logged out.');
     location.reload();
   }
-
+  
    document.addEventListener('DOMContentLoaded', () => {
     console.log('All cookies:', document.cookie); // Log raw cookie string
     // Function to get a cookie by name
@@ -69,9 +74,9 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         document.getElementById('registerContainer').style.display = 'none';
     
         document.getElementById('name').textContent = `Name: ${user.firstName} ${user.lastName}`;
-        document.getElementById('email').textContent = `Email: ${user.email}`;
+        document.getElementById('userEmail').textContent = `Email: ${user.email}`; // Updated ID
         document.getElementById('phone').textContent = `Phone: ${user.phoneNumber || 'Not provided'}`;
-
+  
         const logoutButton = document.getElementById('logoutButton');
   if (logoutButton) {
     logoutButton.addEventListener('click', () => {
@@ -83,5 +88,3 @@ document.getElementById('registerForm').addEventListener('submit', function(even
   }
    
   }});
-  
- 

@@ -7,6 +7,9 @@ const db = new sqlite3.Database('./DB/users.db'); // Path to user database
 router.post('/signup', (req, res) => {
   const { firstName, lastName, email, phoneNumber, password } = req.body;
 
+  // Log the request body to debug
+  console.log('Request body:', req.body);
+
   if (!firstName || !lastName || !email || !phoneNumber || !password) {
       return res.json({ error: 'All fields are required' });
   }
