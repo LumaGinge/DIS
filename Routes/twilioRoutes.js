@@ -1,15 +1,19 @@
+const express = require("express");
+const router = express.Router();
 const twilio = require("twilio");
 require("dotenv").config();
-const app = require("express")();
-const bodyParser = require("body-parser");
-
 
 // Twilio API nøgler
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 
-// Twilio client til afsendelse af velkomstbesked
-const client = require("twilio")(accountSid, authToken);
+// Kontroller, at miljøvariablerne er indlæst korrekt
+if (!accountSid || !authToken) {
+    throw new Error("Twilio API nøgler er ikke korrekt indlæst fra miljøvariablerne.");
+}
+
+// Twilio client til afsendelse af beskeder
+const client = twilio(accountSid, authToken);
 
 // Telefonnummer du vil sende beskeden til
 const toPhoneNumber = "+4529860375";
@@ -17,17 +21,30 @@ const toPhoneNumber = "+4529860375";
 // Telefonnummer du sender beskeden fra (dit Twilio-nummer)
 const fromPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
-// Beskedens indhold
-const messageBody = "Hej! Dette er en testbesked fra Twilio.";
+// Funktion til at generere en tilfældig 6-cifret kode
+const generateRandomCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
-client.messages.create({
-    body: messageBody,
-    from: fromPhoneNumber,
-    to: toPhoneNumber
-}).then(message => console.log(`Message sent: ${message.sid}`))
-  .catch(error => console.error(`Failed to send message: ${error}`));
+// Funktion til at sende en SMS-besked
+const sendSms = (to, body) => {
+    client.messages.create({
+        body: body,
+        from: fromPhoneNumber,
+        to: to
+    }).then(message => console.log(`Message sent: ${message.sid}`))
+      .catch(error => console.error(`Failed to send message: ${error}`));
+};
 
+// Test route for at sende en besked
+router.get("/send-test-sms", (req, res) => {
+    const randomCode = generateRandomCode();
+    const messageBody = `Din bekræftelseskode er: ${randomCode}`;
+    sendSms(toPhoneNumber, messageBody);
+    res.send(`Test SMS sent with code: ${randomCode}`);
+});
 
+module.exports = router;
 /*
 // Twilio responses til webhook for opkald og beskeder
 const MessagingResponse = require("twilio").twiml.MessagingResponse;
