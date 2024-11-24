@@ -1,4 +1,6 @@
+// Routes/loginRoutes.js
 const express = require('express');
+const bcrypt = require('bcrypt'); // Import bcrypt for password comparison
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./DB/users.db');
@@ -11,7 +13,7 @@ router.post('/login', (req, res) => {
   }
 
   const query = 'SELECT * FROM users WHERE email = ?';
-  db.get(query, [email], (err, user) => {
+  db.get(query, [email], async (err, user) => {
     if (err) {
       return res.status(500).json({ error: 'Database error' });
     }
@@ -20,27 +22,35 @@ router.post('/login', (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (password !== user.password) {
-      return res.status(401).json({ error: 'Invalid password' });
-    }
+    try {
+      // Compare the hashed password
+      const isMatch = await bcrypt.compare(password, user.password);
 
-    res.cookie(
-      'user',
-      JSON.stringify({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-      }), // Serialize the object to a JSON string
-      {
-        httpOnly: false, // Ensure the cookie is accessible by JavaScript
-        maxAge: 24 * 60 * 60 * 1000, // 1-day expiration
-        path: '/', // Ensure the cookie is available across all routes
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Invalid password' });
       }
-    );
 
-    // Respond with success
-    res.json({ success: true });
+      res.cookie(
+        'user',
+        JSON.stringify({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+        }), // Serialize the object to a JSON string
+        {
+          httpOnly: false, // Ensure the cookie is accessible by JavaScript
+          maxAge: 24 * 60 * 60 * 1000, // 1-day expiration
+          path: '/', // Ensure the cookie is available across all routes
+        }
+      );
+
+      // Respond with success
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error comparing passwords:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 });
 
