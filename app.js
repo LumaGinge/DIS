@@ -23,6 +23,10 @@ app.use('/api', signupRoutes);
 const loginRoutes = require('./Routes/loginRoutes.js');
 app.use('/api', loginRoutes);
 
+const twilioRoutes = require('./Routes/twilioRoutes.js');
+app.use('/api', twilioRoutes);
+
+
 app.use('/newsletter', newsletterRoutes); // Mount the newsletter routes under /newsletter
 app.use((req, res, next) => {
   /*console.log("----- HTTP Request -----"); 
