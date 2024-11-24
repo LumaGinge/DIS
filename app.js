@@ -4,7 +4,7 @@ const path = require("path");
 const http = require("http")
 const httpProxy = require("http-proxy")
 const responseTime = require('response-time')
-
+require("dotenv").config();
 
 const app = express();
 
@@ -22,6 +22,9 @@ app.use('/api', signupRoutes);
 
 const loginRoutes = require('./Routes/loginRoutes.js');
 app.use('/api', loginRoutes);
+
+const twilioRoutes = require('./Routes/twilioRoutes.js');
+app.use('/api', twilioRoutes);
 
 app.use('/newsletter', newsletterRoutes); // Mount the newsletter routes under /newsletter
 app.use((req, res, next) => {
