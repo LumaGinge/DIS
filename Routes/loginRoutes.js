@@ -87,8 +87,8 @@ router.post('/login', (req, res) => {
           phoneNumber: user.phoneNumber,
         }),
         {
-          httpOnly: false, // Allow JavaScript access to the cookie
-          secure: false, // Use false if testing locally without HTTPS
+          httpOnly: true, // Allow JavaScript access to the cookie
+          secure: true, // Use false if testing locally without HTTPS
           maxAge: 24 * 60 * 60 * 1000, // 1 day
           path: '/', // Make cookie available across all routes
         }
