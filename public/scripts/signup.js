@@ -47,24 +47,33 @@ document.getElementById('registerForm').addEventListener('submit', function(even
     console.log('All cookies:', document.cookie); // Log raw cookie string
     // Function to get a cookie by name
     function getCookie(name) {
-        console.log('All cookies:', document.cookie); // Debug: Log all cookies
-        const cookies = document.cookie.split('; '); // Split cookies into key-value pairs
-        for (const cookie of cookies) {
-          const [key, value] = cookie.split('=');
-          if (key === name) {
-            try {
-              const decodedValue = decodeURIComponent(value); // Decode the cookie value
-              console.log(`Decoded cookie value for ${name}:`, decodedValue); // Debug
-              return JSON.parse(decodedValue); // Parse the decoded value
-            } catch (err) {
-              console.error('Error parsing cookie value:', err); // Debug errors
-              return null;
-            }
-          }
-        }
-        console.log(`Cookie ${name} not found.`);
+      console.log('All cookies (raw):', document.cookie); // Log raw cookies
+      if (!document.cookie) {
+        console.log('No cookies found.');
         return null;
       }
+    
+      const cookies = document.cookie.split('; ').filter(Boolean); // Remove empty strings
+      console.log('Parsed cookies array:', cookies);
+    
+      for (const cookie of cookies) {
+        const [key, value] = cookie.split('=');
+        console.log(`Checking cookie: ${key} = ${value}`);
+        if (key === name) {
+          try {
+            const decodedValue = decodeURIComponent(value);
+            console.log(`Decoded cookie value for ${name}:`, decodedValue);
+            return JSON.parse(decodedValue); // Parse JSON cookie value
+          } catch (err) {
+            console.error('Error parsing cookie value:', err);
+            return null;
+          }
+        }
+      }
+    
+      console.log(`Cookie ${name} not found.`);
+      return null;
+    }
       
   
       const user = getCookie('user'); // Get the 'user' cookie
