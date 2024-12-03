@@ -17,19 +17,6 @@ const fromPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 // Initialize Twilio client
 const client = twilio(accountSid, authToken);
 
-// Function to send SMS
-const sendSms = (to, body) => {
-  console.log(`Sending SMS to ${to}: ${body}`); // Debug log for SMS sending
-  client.messages
-    .create({
-      body: body,
-      from: fromPhoneNumber,
-      to: to,
-    })
-    .then(message => console.log(`Message sent successfully: ${message.sid}`))
-    .catch(error => console.error(`Failed to send message: ${error.message}`));
-};
-
 // Login route
 router.post('/login', (req, res) => {
   console.log('Received login request with body:', req.body); // Log the request body
