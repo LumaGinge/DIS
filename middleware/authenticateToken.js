@@ -3,13 +3,14 @@ const secretKey = process.env.JWT_SECRET;
 
 function authenticateToken(req, res, next) {
   console.log('--- Authenticating Token Middleware ---');
-  console.log('Headers:', req.headers); // Log headers
-  console.log('Cookies:', req.cookies); // Log cookies
+  console.log('Headers:', req.headers);
+  console.log('Cookies:', req.cookies);
 
   if (!req.cookies || !req.cookies.jwtToken) {
-    console.log('No token found in cookies.');
-    req.user = null;
-    return res.status(401).json({ error: 'Unauthenticated access' }); // Return error for missing token
+    console.log('No token found in cookies. Redirecting to login.');
+    res.clearCookie('jwtToken', { path: '/' });
+    res.clearCookie('user', { path: '/' });
+    return res.redirect('/static/signup.html'); // Redirect to login page
   }
 
   const token = req.cookies.jwtToken;
@@ -20,8 +21,9 @@ function authenticateToken(req, res, next) {
     next();
   } catch (error) {
     console.error('Invalid or expired token:', error.message);
-    req.user = null;
-    return res.status(403).json({ error: 'Forbidden: Invalid token' });
+    res.clearCookie('jwtToken', { path: '/' });
+    res.clearCookie('user', { path: '/' });
+    return res.redirect('/static/signup.html'); // Redirect to login page
   }
 }
 
