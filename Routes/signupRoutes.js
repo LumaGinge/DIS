@@ -51,11 +51,11 @@ router.post('/signup', async (req, res) => {
 
       // Set JWT cookie
       res.cookie('jwtToken', token, {
-        httpOnly: false, // Prevent JavaScript access
+        httpOnly: false, // Allow JavaScript access
         secure: false, // Use true if HTTPS is enabled
         maxAge: 60 * 60 * 1000, // 1 hour
         path: '/', // Cookie is valid for all routes
-        sameSite: 'none', // Prevent token from being sent with cross-origin requests
+        sameSite: 'Lax', // Adjust SameSite policy for your needs
       });
 
       // Set user data cookie for UI display
@@ -82,6 +82,7 @@ router.post('/signup', async (req, res) => {
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
+        token: token, // Include the token in the response body
       });
     });
   } catch (error) {
