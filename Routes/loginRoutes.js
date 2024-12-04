@@ -2,20 +2,11 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sqlite3 = require('sqlite3').verbose();
-const twilio = require('twilio');
 require('dotenv').config();
 
 const router = express.Router();
 const secretKey = process.env.JWT_SECRET; // Secret key for signing JWTs
 const db = new sqlite3.Database('./DB/users.db');
-
-// Twilio configuration
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const fromPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
-
-// Initialize Twilio client
-const client = twilio(accountSid, authToken);
 
 // Login route
 router.post('/login', (req, res) => {
@@ -74,20 +65,33 @@ router.post('/login', (req, res) => {
           phoneNumber: user.phoneNumber,
         }),
         {
-          httpOnly: true, // Allow JavaScript access to the cookie
-          secure: true, // Use false if testing locally without HTTPS
+          httpOnly: false, // Allow JavaScript access to the cookie
+          secure: false, // Use false if testing locally without HTTPS
           maxAge: 24 * 60 * 60 * 1000, // 1 day
           path: '/', // Make cookie available across all routes
+          sameSite: 'Lax', // Prevent cross-site access
         }
       );
+      console.log('User cookie set:', JSON.stringify({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+      }));
 
-      // Debugging the cookie header
-      console.log('Set-Cookie header:', res.getHeaders()['set-cookie']);
+      // Setting the JWT token as a cookie
+      console.log('Setting JWT cookie'); // Debug before setting the cookie
+      res.cookie('jwtToken', token, {
+        httpOnly: false, // Prevent JavaScript access for better security
+        secure: false, // Use true if deployed over HTTPS
+        maxAge: 60 * 60 * 1000, // 1 hour
+        path: '/', // Make cookie available across all routes
+        sameSite: 'Strict', // Ensure token is not sent with cross-site requests
+      });
+      console.log('JWT cookie set:', token);
 
-      // Sending SMS notification
-      const loginMessage = `Hello ${user.firstName}, you have successfully logged in to your account.`;
-      console.log('Preparing to send SMS notification'); // Debug SMS preparation
-      sendSms(user.phoneNumber, loginMessage);
+      // Debugging the cookie headers
+      console.log('Set-Cookie headers:', res.getHeaders()['set-cookie']);
 
       // Respond with token
       res.status(200).json({ token });
@@ -97,6 +101,25 @@ router.post('/login', (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+});
+
+router.post('/logout', (req, res) => {
+  console.log('Received logout request'); // Debug log for logout
+  res.clearCookie('user', {
+    path: '/', // Clear the cookie for all paths
+    sameSite: 'Lax',
+  });
+  console.log('Cleared user cookie'); // Log user cookie clearance
+
+  res.clearCookie('jwtToken', {
+    path: '/', // Clear the cookie for all paths
+    sameSite: 'Strict',
+    httpOnly: false, // Matches the initial cookie settings
+  });
+  console.log('Cleared JWT cookie'); // Log JWT cookie clearance
+
+  res.status(200).json({ message: 'Logged out successfully' });
+  console.log('User logged out successfully'); // Log successful logout
 });
 
 module.exports = router;

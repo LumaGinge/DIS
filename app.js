@@ -5,19 +5,25 @@ const http = require("http")
 const httpProxy = require("http-proxy")
 const responseTime = require('response-time')
 require("dotenv").config();
-const jwt = require('jsonwebtoken');
-const secretKey = process.env.JWT_SECRET;
 
 const app = express();
-
-const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the newsletter routes
 app.use(express.json()); // This middleware is necessary for parsing JSON in the request body
-
-app.use(cors());
-app.use("/static", express.static("public"));
-
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+
+const authenticateToken = require('./middleware/authenticateToken');
+const protectedRoutes = require('./Routes/protectedRoutes.js');
+app.use('/protected', protectedRoutes);
+app.use('/protected', authenticateToken);
+
+const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the newsletter routes
+
+app.use(cors({
+  origin: 'http://localhost:3000', // Adjust to your client origin
+  credentials: true, // Allow cookies to be sent
+}));
+
+app.use("/static", express.static("public"));
 
 const signupRoutes = require('./Routes/signupRoutes.js');
 app.use('/api', signupRoutes);
@@ -68,7 +74,10 @@ let addresses = [
 ];
 
 // HTTP Proxy setup
-const proxy = httpProxy.createProxyServer({ changeOrigin: true });
+const proxy = httpProxy.createProxyServer({
+  changeOrigin: true,
+  cookieRewrite: true, // Ensure cookies are rewritten for each target
+});
 
 // Round Robin Load Balancer
 const loadBalancer = http.createServer((req, res) => {

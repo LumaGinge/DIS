@@ -49,11 +49,39 @@ router.post('/signup', async (req, res) => {
 
       console.log('JWT generated:', token); // Log the generated token
 
-      // Respond with success message and token
+      // Set JWT cookie
+      res.cookie('jwtToken', token, {
+        httpOnly: false, // Prevent JavaScript access
+        secure: false, // Use true if HTTPS is enabled
+        maxAge: 60 * 60 * 1000, // 1 hour
+        path: '/', // Cookie is valid for all routes
+        sameSite: 'none', // Prevent token from being sent with cross-origin requests
+      });
+
+      // Set user data cookie for UI display
+      res.cookie(
+        'user',
+        JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          phoneNumber,
+        }),
+        {
+          httpOnly: false, // Allow JavaScript access for UI display
+          secure: false, // Use true if HTTPS is enabled
+          maxAge: 60 * 60 * 1000, // 1 hour
+          path: '/', // Cookie is valid for all routes
+          sameSite: 'none', // Allow navigation within the same site
+        }
+      );
+
+      console.log('Cookies set for user and JWT'); // Debug cookie settings
+
+      // Respond with success message
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
-        token,
       });
     });
   } catch (error) {

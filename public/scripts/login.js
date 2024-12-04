@@ -26,4 +26,19 @@ document.getElementById('loginform').addEventListener('submit', function (event)
       console.error('Login error:', error);
       alert('An error occurred. Please try again.');
     });
+
+    fetch('/protected/endpoint', {
+      method: 'GET',
+      credentials: 'include',
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log('User is authenticated');
+        } else {
+          console.log('User is not authenticated');
+        }
+      })
+      .catch((error) => {
+        console.error('Error verifying authentication:', error);
+      });
 });
