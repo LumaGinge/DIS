@@ -1,9 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const http = require("http")
-const httpProxy = require("http-proxy")
-const responseTime = require('response-time')
+const http = require("http");
+const httpProxy = require("http-proxy");
+const responseTime = require('response-time');
 require("dotenv").config();
 
 const app = express();
@@ -13,9 +13,9 @@ app.use(cookieParser());
 
 const authenticateToken = require('./middleware/authenticateToken');
 const protectedRoutes = require('./Routes/protectedRoutes.js');
-app.use('/protected', protectedRoutes);
-app.use('/protected', authenticateToken);
-
+const twilioRoutes = require('./Routes/twilioRoutes.js');
+const signupRoutes = require('./Routes/signupRoutes.js');
+const loginRoutes = require('./Routes/loginRoutes.js');
 const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the newsletter routes
 
 app.use(cors({
@@ -25,16 +25,13 @@ app.use(cors({
 
 app.use("/static", express.static("public"));
 
-const signupRoutes = require('./Routes/signupRoutes.js');
-app.use('/api', signupRoutes);
-
-const loginRoutes = require('./Routes/loginRoutes.js');
-app.use('/api', loginRoutes);
-
-const twilioRoutes = require('./Routes/twilioRoutes.js');
+app.use('/protected', authenticateToken);
+app.use('/protected', protectedRoutes);
 app.use('/api', twilioRoutes);
-
+app.use('/api', signupRoutes);
+app.use('/api', loginRoutes);
 app.use('/newsletter', newsletterRoutes); // Mount the newsletter routes under /newsletter
+
 app.use((req, res, next) => {
   /*console.log("----- HTTP Request -----"); 
   console.log(`Method: ${req.method}`); // HTTP Method
@@ -53,19 +50,18 @@ app.get("/res", (req, res) => {
   res.send("Response message from server");
 });
 
-
-//Create HTTP servers for load balancing
+// Create HTTP servers for load balancing
 const server1 = http.createServer(app).listen(3001, () => {
-  console.log('Express HTTP server listening on port %d', server1.address().port)
-})
+  console.log('Express HTTP server listening on port %d', server1.address().port);
+});
 
 const server2 = http.createServer(app).listen(3002, () => {
-  console.log('Express HTTP server listening on port %d', server2.address().port)
-})
+  console.log('Express HTTP server listening on port %d', server2.address().port);
+});
 
 const server3 = http.createServer(app).listen(3003, () => {
-  console.log('Express HTTP server listening on port %d', server3.address().port)
-})
+  console.log('Express HTTP server listening on port %d', server3.address().port);
+});
 
 let addresses = [
   { host: 'localhost', port: server1.address().port, protocol: 'http' },
@@ -90,7 +86,7 @@ const loadBalancer = http.createServer((req, res) => {
     target: `${target.protocol}://${target.host}:${target.port}`,
   }, (err) => {
     if (err) {
-      //console.error('Error with proxy:', err);
+      console.error('Error with proxy:', err);
       res.status(500).send('Internal Server Error');
     }
   });
@@ -100,5 +96,4 @@ const loadBalancer = http.createServer((req, res) => {
 }).listen(3000, () => {
   console.log('Load balancer running at port 3000');
 });
-
 

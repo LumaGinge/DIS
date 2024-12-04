@@ -104,39 +104,86 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('Submitting user data:', user); // Debug log
 
-    fetch('/api/signup', {
+    // Send OTP using Twilio
+    fetch('/api/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user),
+      body: JSON.stringify({ phoneNumber: fullPhoneNumber }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          console.error('Error during signup:', data.error); // Debug log
-          alert(`Signup failed: ${data.error}`);
+          console.error('Error sending OTP:', data.error);
+          alert(`Failed to send OTP: ${data.error}`);
         } else {
-          console.log('Signup successful:', data); // Debug log
+          console.log('OTP sent successfully:', data);
+          document.getElementById('registerContainer').style.display = 'none';
+          document.getElementById('otpContainer').style.display = 'block';
 
-          // Set cookies with user data and token
-          document.cookie = `user=${encodeURIComponent(
-            JSON.stringify({
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              phoneNumber: user.phoneNumber,
+          // Handle OTP verification
+          document.getElementById('otpForm').addEventListener('submit', function (otpEvent) {
+            otpEvent.preventDefault();
+            const otp = document.getElementById('otp').value;
+
+            fetch('/api/verify-otp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ phoneNumber: fullPhoneNumber, otp }),
             })
-          )}; path=/; max-age=3600;`; // 1-hour expiry
+              .then((response) => response.json())
+              .then((otpData) => {
+                if (otpData.error) {
+                  console.error('Error verifying OTP:', otpData.error);
+                  alert(`Failed to verify OTP: ${otpData.error}`);
+                } else {
+                  console.log('OTP verified successfully:', otpData);
 
-          document.cookie = `jwtToken=${data.token}; path=/; HttpOnly; max-age=3600;`; // JWT cookie
+                  // Proceed to signup after successful OTP verification
+                  fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(user),
+                  })
+                    .then((signupResponse) => signupResponse.json())
+                    .then((signupData) => {
+                      if (signupData.error) {
+                        console.error('Error during signup:', signupData.error);
+                        alert(`Signup failed: ${signupData.error}`);
+                      } else {
+                        console.log('Signup successful:', signupData);
 
-          // Redirect or update UI
-          window.location.href = '/'; // Reload or redirect to the homepage
+                        // Set cookies with user data and token
+                        document.cookie = `user=${encodeURIComponent(
+                          JSON.stringify({
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                            phoneNumber: user.phoneNumber,
+                          })
+                        )}; path=/; max-age=3600;`;
+
+                        document.cookie = `jwtToken=${signupData.token}; path=/; max-age=3600;`;
+
+                        // Redirect or update UI
+                        window.location.href = '/'; // Reload or redirect to the homepage
+                      }
+                    })
+                    .catch((error) => {
+                      console.error('Signup request failed:', error); // Debug log
+                      alert('Signup request failed. Please try again.');
+                    });
+                }
+              })
+              .catch((error) => {
+                console.error('Error verifying OTP:', error);
+                alert('Failed to verify OTP. Please try again.');
+              });
+          });
         }
       })
       .catch((error) => {
-        console.error('Signup request failed:', error); // Debug log
-        alert('Signup request failed. Please try again.');
+        console.error('Error sending OTP:', error); // Debug log
+        alert('Failed to send OTP. Please try again.');
       });
   });
 });
-

@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
 <head>
- <meta charset="UTF-8">
- <meta http-equiv="X-UA-Compatible" content="IE=edge">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <link rel="stylesheet" href="./styles/global.css">
- <title>JOE and The Juice</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./styles/global.css">
+  <title>JOE and The Juice</title>
 </head>
 
 <body>
@@ -47,8 +46,8 @@
             <option value="+47">+47</option>
             <option value="+49">+49</option>
           </select>
-        <input type="tel" id="phoneNumber" placeholder="Phone Number" required autocomplete="tel">
-        
+          <input type="tel" id="phoneNumber" placeholder="Phone Number" required autocomplete="tel">
+        </div>
         <div id="submitbutton">
           <button type="submit">Sign Up</button>
         </div>
@@ -57,10 +56,20 @@
         <p>Already have an account? <a href="./login.html">Login here</a></p>
       </div>
     </div>
+
+    <!-- OTP Form Container -->
+    <div id="otpContainer" class="container" style="display: none;">
+      <h2>Enter OTP</h2>
+      <form id="otpForm">
+        <input type="text" id="otp" placeholder="Enter OTP" required>
+        <button type="submit">Verify OTP</button>
+      </form>
+    </div>
   </div>
+
+  <script src="./scripts/signup.js"></script>
+  <script>
+    console.log('HTML script loaded'); // Debugging statement
+  </script>
 </body>
-
-<script src="./scripts/signup.js"></script>
-
-
 </html>
