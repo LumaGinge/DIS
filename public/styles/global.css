@@ -45,10 +45,6 @@ ul {
     display: block;
     width: 65px;
   }
-  
-.active{
-    font-weight: bolder;
-}
 
   li a:hover {
     font-weight: bolder;

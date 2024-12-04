@@ -1,0 +1,89 @@
+body {
+  background: linear-gradient(to bottom, #f09bc1, white);
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.container.hidden {
+  display: none;
+}
+
+input,
+select {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.phone-group {
+  display: flex;
+  gap: 10px;
+}
+
+.phone-group select {
+  width: 25%;
+}
+
+.phone-group input {
+  width: 75%;
+}
+
+.btn:hover {
+  background-color: #f088b7;
+}
+
+.bottom-text {
+  margin-top: 15px;
+}
+
+.bottom-text a {
+  color: #f088b7;
+  text-decoration: none;
+}
+
+.bottom-text a:hover {
+  text-decoration: underline;
+}
+
+/* General button styles */
+button {
+  background-color: #f7c1d9; /* Base color */
+  color: black; /* Text color */
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer; /* Pointer on hover */
+  transition: all 0.3s ease; /* Smooth transitions */
+}
+
+/* Hover effect for buttons */
+button:hover {
+  background-color: #f088b7; /* Slightly darker color */
+  transform: scale(1.05); /* Slight enlargement */
+}
+
+/* Active effect for buttons */
+button:active {
+  background-color: #e075a1; /* Even darker color on click */
+  transform: scale(0.95); /* Slight shrink */
+}
