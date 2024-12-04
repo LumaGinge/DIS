@@ -1,5 +1,6 @@
 body {
   margin: 0px;
+  font-family: 'nunito', sans-serif;
 }
 
 #index-page {
@@ -20,13 +21,13 @@ body {
 }
 
 ul {
-    font-family: Calibri;
+    font-family: 'nunito', sans-serif;
     list-style-type: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #f7c1d9;
-    font-size: 2em;
+    font-size: 1.5em;
   }
   
   li {
@@ -37,7 +38,7 @@ ul {
     display: block;
     color: rgb(41, 41, 41);
     text-align: center;
-    padding: 14px 16px;
+    padding: 15px 15px;
     text-decoration: none;
   }
   li img{
@@ -46,12 +47,10 @@ ul {
   }
   
 .active{
-    background-color: #f09bc1;
     font-weight: bolder;
 }
 
   li a:hover {
-    background-color: #f088b7;
     font-weight: bolder;
 }
 
@@ -60,9 +59,6 @@ ul {
     height: 65px;
 }
 
-/* .container {
-  margin: auto;
-} */
 
 .center {
   padding-top: 50px;
