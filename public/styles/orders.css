@@ -1,0 +1,53 @@
+.orders-container {
+    display: flex;
+    flex-wrap: wrap; /* Wrap orders horizontally */
+    gap: 20px; /* Space between orders */
+    padding: 20px;
+    justify-content: center; /* Align items to the left */
+}
+
+.order {
+    flex: 1 1 300px; /* Make each order take up to 300px and be responsive */
+    max-width: 300px; /* Set a maximum width to ensure proper wrapping */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+    padding: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.order:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.order h3 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.order ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.order ul li {
+    font-size: 0.9em;
+    padding: 5px 0;
+    color: #555;
+}
+
+.order ul li span {
+    font-weight: bold;
+}
+
+.order .total {
+    font-size: 1em;
+    color: #444;
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: right;
+}

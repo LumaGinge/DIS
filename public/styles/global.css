@@ -4,7 +4,7 @@ body {
 }
 
 #index-page {
-  background: linear-gradient(to bottom, #f09bc1, white);
+  background: linear-gradient(to bottom, rgb(240, 155, 193), white);
   min-height: 100vh;
   margin: 0;
 }
