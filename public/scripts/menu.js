@@ -77,40 +77,33 @@ const productList = [
     },
 
 ];
+
 let basket = {}; // Store added products
 
-// Function to display the products
 function displayProducts() {
     const productContainer = document.getElementById("product-list");
 
-    // Clear the container before adding new products
-    productContainer.innerHTML = "";
+    productContainer.innerHTML = ""; // Clear previous content
 
-    // Iterate through the product list and add each product to the DOM
     productList.forEach((product) => {
         const productItem = document.createElement("div");
         productItem.classList.add("product-item");
 
-        // Image
         const img = document.createElement("img");
-        img.src = product.imgsrc;  // Image source (adjust based on your structure)
+        img.src = product.imgsrc;
         img.alt = product.productName;
 
-        // Product name
         const productName = document.createElement("h3");
         productName.innerText = product.productName;
 
-
-        // Product price
         const productPrice = document.createElement("p");
         productPrice.innerText = `Price: ${product.price.toFixed(2)} kr.`;
 
-        // Quantity input
         const quantityInput = document.createElement("input");
         quantityInput.type = "number";
-        quantityInput.value = 1; // Default quantity
-        quantityInput.min = 1; // Minimum quantity
-        quantityInput.max = 10; // Maximum quantity
+        quantityInput.value = 1;
+        quantityInput.min = 1;
+        quantityInput.max = 10;
         quantityInput.classList.add("quantity-input");
 
         const addButton = document.createElement("button");
@@ -119,40 +112,40 @@ function displayProducts() {
         addButton.addEventListener("click", () => {
             const quantity = parseInt(quantityInput.value, 10);
             if (quantity >= 1 && quantity <= 10) {
-                addToBasket(product.productName, product.price, quantity);
+                fetchProductIdAndAddToBasket(product.productName, product.price, quantity); // Dynamically fetch `product_id`
             } else {
                 alert("Please enter a quantity between 1 and 10.");
             }
-        });
+        });        
 
-        // Add image and product name to the product card
         productItem.appendChild(img);
         productItem.appendChild(productName);
         productItem.appendChild(productPrice);
         productItem.appendChild(quantityInput);
         productItem.appendChild(addButton);
 
-        // Add the product card to the container
         productContainer.appendChild(productItem);
     });
 }
 
-// Function to add a product to the basket
-function addToBasket(productName, price, quantity) {
-    // Check if the product already exists in the basket
+
+function addToBasket(productName, price, quantity, productId) {
     if (basket[productName]) {
-        basket[productName].quantity += quantity; // Update quantity
+        basket[productName].quantity += quantity;
         if (basket[productName].quantity > 10) {
-            basket[productName].quantity = 10; // Limit the quantity
+            basket[productName].quantity = 10;
             alert(`${productName} quantity limited to 10.`);
         }
     } else {
-        basket[productName] = { quantity, price }; // Create a new entry if not exists
+        basket[productName] = { quantity, price, productId }; // Store productId
     }
 
-    calculateTotal(); // Call to calculate and display the total
-    displayBasket(); // Call to display the basket contents
+    calculateTotal();
+    displayBasket();
 }
+
+
+
 // Function to calculate and display the total price of the basket
 function calculateTotal() {
     let total = 0;
@@ -187,3 +180,65 @@ function displayBasket() {
 }
 // Call the function to display the products on the page
 displayProducts();
+
+function fetchAndDisplayProducts() {
+    fetch('/api/products')
+        .then(response => response.json())
+        .then(productList => {
+            displayProducts(productList); // Pass the fetched data to displayProducts
+        })
+        .catch(err => console.error("Error fetching products:", err));
+}
+
+  
+function submitOrder() {
+    const orderItems = Object.keys(basket).map(productName => {
+        const product = basket[productName];
+        return { productId: product.productId, quantity: product.quantity, price: product.price };
+    });
+
+    const totalPrice = orderItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+
+    // Debugging logs
+    console.log("Order items being sent:", orderItems);
+    console.log("Total Price:", totalPrice);
+
+    // Replace this with the actual logged-in user's ID
+    const userId = 1; // Example user ID; replace with real logic
+
+    fetch('/api/save-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, items: orderItems, totalPrice }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Order saved:", data);
+        alert(`Order saved successfully! Order ID: ${data.orderId}`);
+    })
+    .catch(err => console.error("Error saving order:", err.message));
+}
+
+
+function fetchProductIdAndAddToBasket(productName, price, quantity) {
+    fetch(`/api/products?name=${encodeURIComponent(productName)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch product ID for ${productName}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.product_id) {
+                addToBasket(productName, price, quantity, data.product_id); // Add to basket with `product_id`
+            } else {
+                alert(`Product ID not found for ${productName}`);
+            }
+        })
+        .catch(err => console.error("Error fetching product ID:", err.message));
+}

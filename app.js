@@ -17,6 +17,7 @@ const twilioRoutes = require('./Routes/twilioRoutes.js');
 const signupRoutes = require('./Routes/signupRoutes.js');
 const loginRoutes = require('./Routes/loginRoutes.js');
 const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the newsletter routes
+const ordersRoutes = require('./Routes/ordersRoutes');
 
 app.use(cors({
   origin: 'http://localhost:3000', // Adjust to your client origin
@@ -24,13 +25,14 @@ app.use(cors({
 }));
 
 app.use("/static", express.static("public"));
-
 app.use('/protected', authenticateToken);
 app.use('/protected', protectedRoutes);
 app.use('/api', twilioRoutes);
 app.use('/api', signupRoutes);
 app.use('/api', loginRoutes);
 app.use('/newsletter', newsletterRoutes); // Mount the newsletter routes under /newsletter
+app.use('/api', ordersRoutes);
+
 
 app.use((req, res, next) => {
   /*console.log("----- HTTP Request -----"); 
