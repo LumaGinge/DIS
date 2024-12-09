@@ -190,8 +190,34 @@ function fetchAndDisplayProducts() {
         .catch(err => console.error("Error fetching products:", err));
 }
 
-  
+function getUserIdFromCookie() {
+    console.log("Current cookies:", document.cookie); // Debug log for cookies
+    const cookies = document.cookie.split('; ');
+    const userCookie = cookies.find(cookie => cookie.startsWith('user='));
+    if (!userCookie) {
+        console.error("User cookie not found!");
+        return null;
+    }
+
+    try {
+        const user = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
+        console.log("Parsed user cookie:", user); // Debug log for parsed user
+        return user.id; // Replace with the correct key for the user ID
+    } catch (err) {
+        console.error("Error parsing user cookie:", err.message);
+        return null;
+    }
+}
+
+
+
 function submitOrder() {
+    const userId = getUserIdFromCookie(); // Fetch the userId dynamically
+    if (!userId) {
+        alert("User not logged in! Cannot place an order.");
+        return;
+    }
+
     const orderItems = Object.keys(basket).map(productName => {
         const product = basket[productName];
         return { productId: product.productId, quantity: product.quantity, price: product.price };
@@ -202,9 +228,7 @@ function submitOrder() {
     // Debugging logs
     console.log("Order items being sent:", orderItems);
     console.log("Total Price:", totalPrice);
-
-    // Replace this with the actual logged-in user's ID
-    const userId = 1; // Example user ID; replace with real logic
+    console.log("Submitting order for userId:", userId);
 
     fetch('/api/save-order', {
         method: 'POST',
@@ -223,6 +247,7 @@ function submitOrder() {
     })
     .catch(err => console.error("Error saving order:", err.message));
 }
+
 
 
 function fetchProductIdAndAddToBasket(productName, price, quantity) {

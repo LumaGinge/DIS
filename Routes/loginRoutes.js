@@ -59,6 +59,7 @@ router.post('/login', (req, res) => {
       res.cookie(
         'user',
         JSON.stringify({
+          id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
@@ -73,6 +74,7 @@ router.post('/login', (req, res) => {
         }
       );
       console.log('User cookie set:', JSON.stringify({
+        id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,

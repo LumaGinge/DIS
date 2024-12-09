@@ -1,166 +1,175 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const router = express.Router();
-const db = new sqlite3.Database('./DB/products.db');
+
+// Unified database connection
+const db = new sqlite3.Database('./DB/users.db', (err) => {
+    if (err) {
+        console.error("Error connecting to database:", err.message);
+    } else {
+        console.log("Connected to the unified database.");
+    }
+});
+
+// Enable foreign key constraints
+db.run(`PRAGMA foreign_keys = ON;`);
 
 // Endpoint to fetch products
 router.get('/products', (req, res) => {
-  const productName = req.query.name;
+    const productName = req.query.name;
 
-  if (productName) {
-    db.get(
-      'SELECT product_id FROM Products WHERE product_name = ?',
-      [productName],
-      (err, row) => {
-        if (err) {
-          console.error("Error fetching product ID:", err.message);
-          return res.status(500).json({ error: "Failed to fetch product ID" });
-        }
-        if (row) {
-          res.json(row); // Send the product ID
-        } else {
-          res.status(404).json({ error: "Product not found" });
-        }
-      }
-    );
-  } else {
-    db.all('SELECT * FROM Products', [], (err, rows) => {
-      if (err) {
-        console.error("Error fetching products:", err.message);
-        res.status(500).json({ error: "Failed to fetch products" });
-      } else {
-        res.json(rows);
-      }
-    });
-  }
+    if (productName) {
+        db.get(
+            'SELECT product_id FROM products WHERE product_name = ?',
+            [productName],
+            (err, row) => {
+                if (err) {
+                    console.error("Error fetching product ID:", err.message);
+                    return res.status(500).json({ error: "Failed to fetch product ID" });
+                }
+                if (row) {
+                    res.json(row);
+                } else {
+                    res.status(404).json({ error: "Product not found" });
+                }
+            }
+        );
+    } else {
+        db.all('SELECT * FROM products', [], (err, rows) => {
+            if (err) {
+                console.error("Error fetching products:", err.message);
+                res.status(500).json({ error: "Failed to fetch products" });
+            } else {
+                res.json(rows);
+            }
+        });
+    }
 });
 
 // Endpoint to place an order
 router.post('/place-order', (req, res) => {
-  const { orderItems } = req.body;
-  console.log("Received order items:", orderItems);
-
-  if (!orderItems || orderItems.length === 0 || !orderItems.every(item => item.productId)) {
-    return res.status(400).json({ error: "Order items must include productId and quantity." });
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+      return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
 
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, secretKey, (err, user) => {
+      if (err) {
+          return res.status(403).json({ error: "Forbidden: Invalid token" });
+      }
+
+      const userId = user.id; // Extract userId from the token
+      const { orderItems } = req.body;
+
+      if (!orderItems || orderItems.length === 0 || !orderItems.every(item => item.productId && item.quantity)) {
+          return res.status(400).json({ error: "Invalid order data. Include productId and quantity." });
+      }
+
+      processOrder(userId, orderItems, res);
+  });
+});
+
+function processOrder(userId, orderItems, res) {
   const placeholders = orderItems.map(() => '?').join(',');
   const productIds = orderItems.map(item => item.productId);
   const quantities = Object.fromEntries(orderItems.map(item => [item.productId, item.quantity]));
 
-  db.all(`SELECT * FROM Products WHERE product_id IN (${placeholders})`, productIds, (err, rows) => {
-    if (err) {
-      console.error("Error fetching products for order:", err.message);
-      return res.status(500).json({ error: "Failed to process order." });
+  db.all(`SELECT * FROM products WHERE product_id IN (${placeholders})`, productIds, (err, rows) => {
+      if (err) {
+          console.error("Error fetching products for order:", err.message);
+          return res.status(500).json({ error: "Failed to process order." });
+      }
+
+      const order = rows.map(product => ({
+          productId: product.product_id,
+          productName: product.product_name,
+          price: product.price,
+          quantity: quantities[product.product_id],
+          total: product.price * quantities[product.product_id],
+      }));
+
+      const totalOrderPrice = order.reduce((sum, item) => sum + item.total, 0);
+
+      db.run(
+        `INSERT INTO orders (user_id, total_price) VALUES (?, ?)`,
+        [userId, totalOrderPrice],
+        function (err) {
+            if (err) {
+                console.error("Error inserting order:", err.message);
+                return res.status(500).json({ error: "Failed to save order." });
+            }
+    
+            // Debugging log
+            console.log(`Placing order for user ID: ${userId}`);
+    
+            const orderId = this.lastID;
+            console.log(`Order inserted with ID: ${orderId}, for user ID: ${userId}`);
+    
+            const insertItems = db.prepare(`
+                INSERT INTO order_items (order_id, product_id, quantity, price, total)
+                VALUES (?, ?, ?, ?, ?)
+            `);
+    
+            order.forEach(item => {
+                insertItems.run(orderId, item.productId, item.quantity, item.price, item.total);
+            });
+    
+            insertItems.finalize(err => {
+                if (err) {
+                    console.error("Error finalizing order items:", err.message);
+                    return res.status(500).json({ error: "Failed to save order items." });
+                }
+    
+                res.json({ message: 'Order placed successfully', orderId, totalOrderPrice, order });
+            });
+        }
+    );
+    
+  });
+}
+
+// Endpoint to save order explicitly
+router.post('/save-order', (req, res) => {
+    const { userId, items, totalPrice } = req.body;
+
+    if (!userId || !items || !items.length || !totalPrice) {
+        return res.status(400).json({ error: 'Invalid order data.' });
     }
 
-    const order = rows.map(product => ({
-      productId: product.product_id,
-      productName: product.product_name,
-      price: product.price,
-      quantity: quantities[product.product_id],
-      total: product.price * quantities[product.product_id],
-    }));
+    db.run(
+        `INSERT INTO orders (user_id, total_price) VALUES (?, ?)`,
+        [userId, totalPrice],
+        function (err) {
+            if (err) {
+                console.error("Error inserting order:", err.message);
+                return res.status(500).json({ error: "Failed to save order." });
+            }
 
-    const totalOrderPrice = order.reduce((sum, item) => sum + item.total, 0);
+            const orderId = this.lastID;
+            console.log("Order inserted with ID:", orderId);
 
-    console.log("Order cookie:", JSON.stringify(order));
+            const insertItems = db.prepare(`
+                INSERT INTO order_items (order_id, product_id, quantity, price, total)
+                VALUES (?, ?, ?, ?, ?)
+            `);
 
-    res.cookie('order', JSON.stringify(order), {
-      httpOnly: false,
-      secure: false,
-      maxAge: 24 * 60 * 60 * 1000,
-      path: '/',
-      sameSite: 'Lax',
-    });
+            items.forEach(item => {
+                insertItems.run(orderId, item.productId, item.quantity, item.price, item.quantity * item.price);
+            });
 
-    res.json({ order, totalOrderPrice });
-  });
-});
+            insertItems.finalize(err => {
+                if (err) {
+                    console.error("Error finalizing order items:", err.message);
+                    return res.status(500).json({ error: "Failed to save order items." });
+                }
 
-db.serialize(() => {
-    db.run(`ATTACH DATABASE './DB/users.db' AS usersDb`, (err) => {
-        if (err) {
-            console.error("Error attaching users database:", err.message);
-        } else {
-            console.log("Users database attached successfully.");
+                res.json({ message: 'Order saved successfully', orderId });
+            });
         }
-    });
+    );
 });
 
-router.post('/save-order', (req, res) => {
-  const { userId, items, totalPrice } = req.body;
-
-  // Validate input
-  if (!userId || !items || !items.length || !totalPrice) {
-      return res.status(400).json({ error: 'Invalid order data' });
-  }
-
-  // Validate user in the users database
-  db.get(
-      `SELECT id FROM usersDb.users WHERE id = ?`,
-      [userId],
-      (err, row) => {
-          if (err) {
-              console.error("Error validating user:", err.message);
-              return res.status(500).json({ error: "Failed to validate user" });
-          }
-
-          if (!row) {
-              return res.status(400).json({ error: "Invalid user ID" });
-          }
-
-          console.log("User validated:", row);
-
-          // Insert the order into the orders table
-          db.run(
-              `INSERT INTO orders (user_id, total_price) VALUES (?, ?)`,
-              [userId, totalPrice],
-              function (err) {
-                  if (err) {
-                      console.error("Error inserting order:", err.message);
-                      return res.status(500).json({ error: "Failed to save order" });
-                  }
-
-                  const orderId = this.lastID; // Get the newly created order ID
-                  console.log("Order inserted with ID:", orderId);
-
-                  // Insert items into the order_items table
-                  const insertItems = db.prepare(`
-                      INSERT INTO order_items (order_id, product_id, quantity, price, total)
-                      VALUES (?, ?, ?, ?, ?)
-                  `);
-
-                  items.forEach(item => {
-                      insertItems.run(
-                          orderId,
-                          item.productId,
-                          item.quantity,
-                          item.price,
-                          item.quantity * item.price,
-                          (err) => {
-                              if (err) {
-                                  console.error("Error inserting order item:", err.message);
-                              }
-                          }
-                      );
-                  });
-
-                  insertItems.finalize(err => {
-                      if (err) {
-                          console.error("Error finalizing item inserts:", err.message);
-                          return res.status(500).json({ error: "Failed to save order items" });
-                      }
-
-                      res.json({ message: 'Order saved successfully', orderId });
-                  });
-              }
-          );
-      }
-  );
-});
-
-// Endpoint to get orders for a specific user
 router.get('/get-orders/:userId', (req, res) => {
   const { userId } = req.params;
 
@@ -177,10 +186,9 @@ router.get('/get-orders/:userId', (req, res) => {
       (err, rows) => {
           if (err) {
               console.error("Error fetching user orders:", err.message);
-              return res.status(500).json({ error: "Failed to fetch orders" });
+              return res.status(500).json({ error: "Failed to fetch orders." });
           }
 
-          // Group items by order
           const orders = rows.reduce((acc, row) => {
               if (!acc[row.order_id]) {
                   acc[row.order_id] = {
@@ -198,11 +206,10 @@ router.get('/get-orders/:userId', (req, res) => {
               return acc;
           }, {});
 
-          res.json(Object.values(orders)); // Return grouped orders
+          res.json(Object.values(orders));
       }
   );
 });
-
 
 
 // Export the router
