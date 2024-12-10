@@ -20,7 +20,7 @@ const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the 
 const ordersRoutes = require('./Routes/ordersRoutes');
 
 app.use(cors({
-  origin: 'http://localhost:3000', // Adjust to your client origin
+  origin: 'https://joejuice.store/', // Adjust to your client origin
   credentials: true, // Allow cookies to be sent
 }));
 
@@ -66,14 +66,14 @@ const server3 = http.createServer(app).listen(3003, () => {
 });
 
 let addresses = [
-  { host: 'localhost', port: server1.address().port, protocol: 'http' },
-  { host: 'localhost', port: server2.address().port, protocol: 'http' },
-  { host: 'localhost', port: server3.address().port, protocol: 'http' }
+  { host: 'joejuice.store', port: server1.address().port, protocol: 'http' },
+  { host: 'joejuice.store', port: server2.address().port, protocol: 'http' },
+  { host: 'joejuice.store', port: server3.address().port, protocol: 'http' }
 ];
 
 // HTTP Proxy setup
 const proxy = httpProxy.createProxyServer({
-  changeOrigin: true,
+  changeOrigin: true, // Change the origin of the host header to the target URL
   cookieRewrite: true, // Ensure cookies are rewritten for each target
 });
 
