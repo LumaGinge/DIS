@@ -20,7 +20,7 @@ const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the 
 const ordersRoutes = require('./Routes/ordersRoutes');
 
 app.use(cors({
-  origin: 'https://joejuice.store/', // Adjust to your client origin
+  origin: 'https://joejuice.store', // Adjust to your client origin
   credentials: true, // Allow cookies to be sent
 }));
 

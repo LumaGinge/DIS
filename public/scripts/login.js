@@ -6,11 +6,11 @@ document.getElementById('loginform').addEventListener('submit', function (event)
     password: document.getElementById('password').value,
   };
 
-  fetch('/api/login', { // Replace with your backend login endpoint
+  fetch('https://joejuice.store/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(user),
-    credentials: 'include', // Ensures cookies are sent
+    credentials: 'include',
   })
     .then(response => response.json())
     .then(data => {
