@@ -66,9 +66,9 @@ const server3 = http.createServer(app).listen(3003, () => {
 });
 
 let addresses = [
-  { host: 'joejuice.store', port: server1.address().port, protocol: 'http' },
-  { host: 'joejuice.store', port: server2.address().port, protocol: 'http' },
-  { host: 'joejuice.store', port: server3.address().port, protocol: 'http' }
+  { host: 'localhost', port: server1.address().port, protocol: 'http' },
+  { host: 'localhost', port: server2.address().port, protocol: 'http' },
+  { host: 'localhost', port: server3.address().port, protocol: 'http' }
 ];
 
 // HTTP Proxy setup

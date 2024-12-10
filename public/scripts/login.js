@@ -6,11 +6,11 @@ document.getElementById('loginform').addEventListener('submit', function (event)
     password: document.getElementById('password').value,
   };
 
-  fetch('https://joejuice.store/api/login', {
+  fetch('/api/login', { 
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(user),
-    credentials: 'include',
+    credentials: 'include', // Ensures cookies are sent
   })
     .then(response => response.json())
     .then(data => {
