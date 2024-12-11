@@ -15,7 +15,7 @@ document.getElementById('loginform').addEventListener('submit', function (event)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
-        const errorMessage = document.getElementById('error-message');
+        const errorMessage = 'error-message Noah er grim';
         errorMessage.style.display = 'block';
         errorMessage.textContent = `Error: ${data.error}`;
       } else {
