@@ -8,11 +8,6 @@ const router = express.Router();
 const db = new sqlite3.Database('./DB/users.db'); // Path to user database
 const secretKey = process.env.JWT_SECRET; // Secret key for JWT
 
-router.get('/api/user', authenticateToken, (req, res) => {
-  res.json({ user: req.user }); // Return the decoded user information
-});
-
-
 router.post('/signup', async (req, res) => {
   const { firstName, lastName, email, phoneNumber, password } = req.body;
 
