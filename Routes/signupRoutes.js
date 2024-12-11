@@ -8,18 +8,8 @@ const router = express.Router();
 const db = new sqlite3.Database('./DB/users.db'); // Path to user database
 const secretKey = process.env.JWT_SECRET; // Secret key for JWT
 
-router.get('/user', (req, res) => {
-  const token = req.cookies.jwtToken; // Retrieve the JWT from the HttpOnly cookie
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, secretKey); // Verify the JWT
-    res.status(200).json({ user: decoded }); // Respond with user data
-  } catch (err) {
-    res.status(403).json({ error: 'Invalid or expired token' });
-  }
+router.get('/api/user', authenticateToken, (req, res) => {
+  res.json({ user: req.user }); // Return the decoded user information
 });
 
 
