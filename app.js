@@ -20,7 +20,7 @@ const newsletterRoutes = require('./Routes/newsletterRoutes.js'); // Import the 
 const ordersRoutes = require('./Routes/ordersRoutes');
 
 app.use(cors({
-  origin: 'https://joejuice.store', // Adjust to your client origin
+  origin: 'http://localhost:3000', // Adjust to your client origin
   credentials: true, // Allow cookies to be sent
 }));
 
@@ -73,7 +73,7 @@ let addresses = [
 
 // HTTP Proxy setup
 const proxy = httpProxy.createProxyServer({
-  changeOrigin: true, // Change the origin of the host header to the target URL
+  changeOrigin: true,
   cookieRewrite: true, // Ensure cookies are rewritten for each target
 });
 
