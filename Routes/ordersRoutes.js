@@ -173,7 +173,7 @@ router.post('/save-order', (req, res) => {
 });
 
 router.get('/get-orders', authenticateToken, (req, res) => {
-  const userId = req.user.id; // Extract userId from the token
+  const userId = req.user.id; // Extract the user ID from the verified token
 
   db.all(
     `SELECT o.order_id, o.total_price, oi.product_id, oi.quantity, oi.price, oi.total
@@ -204,11 +204,10 @@ router.get('/get-orders', authenticateToken, (req, res) => {
         return acc;
       }, {});
 
-      res.json(Object.values(orders));
+      res.json(Object.values(orders)); // Return the structured orders
     }
   );
 });
-
 
 // Export the router
 module.exports = router;

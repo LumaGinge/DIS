@@ -1,3 +1,5 @@
+// orders.js
+
 // Decode JWT function
 function decodeToken(token) {
     try {
@@ -9,40 +11,20 @@ function decodeToken(token) {
     }
   }
   
-  // Fetch and display orders for the logged-in user
-  function fetchAndDisplayOrdersForLoggedInUser() {
-    // Retrieve JWT from cookies
-    const jwtToken = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('jwtToken='))
-      ?.split('=')[1];
-  
-    if (!jwtToken) {
-      console.error("JWT not found! Cannot fetch orders.");
-      return;
-    }
-  
-    const user = decodeToken(jwtToken); // Decode the JWT to get user data
-    if (!user || !user.id) {
-      console.error("Invalid JWT! Cannot fetch orders.");
-      return;
-    }
-  
-    fetchAndDisplayOrders(jwtToken, user.id);
-  }
-  
-  // Fetch and display orders
-  function fetchAndDisplayOrders(jwtToken, userId) {
-    console.log("Fetching orders for userId:", userId);
-  
+  /// Fetch and display orders for the logged-in user
+function fetchAndDisplayOrdersForLoggedInUser() {
+    // Fetch orders from the API with credentials included
     fetch(`/api/get-orders`, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${jwtToken}`, // Include JWT in Authorization header
-      },
+      credentials: 'include', // Ensure cookies are sent automatically
     })
       .then(response => {
         if (!response.ok) {
+          if (response.status === 401) {
+            // Unauthorized; redirect to login
+            alert("Session expired. Please log in again.");
+            window.location.href = "/static/login.html";
+          }
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
@@ -50,7 +32,10 @@ function decodeToken(token) {
       .then(orders => {
         displayOrders(orders); // Display the fetched orders
       })
-      .catch(err => console.error("Error fetching orders:", err.message));
+      .catch(err => {
+        console.error("Error fetching orders:", err.message);
+        alert("Failed to fetch orders. Please try again later.");
+      });
   }
   
   // Display orders in the DOM
@@ -58,7 +43,7 @@ function decodeToken(token) {
     const ordersContainer = document.getElementById("orders-container");
     ordersContainer.innerHTML = ""; // Clear previous content
   
-    if (orders.length === 0) {
+    if (!orders || orders.length === 0) {
       ordersContainer.innerHTML = "<p>No orders found.</p>";
       return;
     }
@@ -88,5 +73,4 @@ function decodeToken(token) {
   
   // Initialize and fetch orders for the logged-in user
   fetchAndDisplayOrdersForLoggedInUser();
-  
   
