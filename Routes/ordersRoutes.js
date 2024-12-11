@@ -170,7 +170,7 @@ router.post('/save-order', (req, res) => {
     );
 });
 
-router.get('/get-orders/:userId', (req, res) => {
+router.get('/api/get-orders/:userId', (req, res) => {
   const { userId } = req.params;
 
   if (!userId) {
