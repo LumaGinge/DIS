@@ -8,7 +8,7 @@ const router = express.Router();
 const db = new sqlite3.Database('./DB/users.db'); // Path to user database
 const secretKey = process.env.JWT_SECRET; // Secret key for JWT
 
-router.get('/user', (req, res) => {
+router.get('api/user', (req, res) => {
   const token = req.cookies.jwtToken; // Retrieve the JWT from the HttpOnly cookie
   if (!token) {
     return res.status(401).json({ error: 'Unauthorized' });
