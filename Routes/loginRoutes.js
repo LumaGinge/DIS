@@ -66,8 +66,8 @@ router.post('/login', (req, res) => {
           phoneNumber: user.phoneNumber,
         }),
         {
-          httpOnly: false, // Allow JavaScript access to the cookie
-          secure: false, // Use false if testing locally without HTTPS
+          httpOnly: true, // Allow JavaScript access to the cookie
+          secure: true, // Use false if testing locally without HTTPS
           maxAge: 24 * 60 * 60 * 1000, // 1 day
           path: '/', // Make cookie available across all routes
           sameSite: 'Lax', // Prevent cross-site access
@@ -84,8 +84,8 @@ router.post('/login', (req, res) => {
       // Setting the JWT token as a cookie
       console.log('Setting JWT cookie'); // Debug before setting the cookie
       res.cookie('jwtToken', token, {
-        httpOnly: false, // Prevent JavaScript access for better security
-        secure: false, // Use true if deployed over HTTPS
+        httpOnly: true, // Prevent JavaScript access for better security
+        secure: true, // Use true if deployed over HTTPS
         maxAge: 60 * 60 * 1000, // 1 hour
         path: '/', // Make cookie available across all routes
         sameSite: 'Strict', // Ensure token is not sent with cross-site requests
