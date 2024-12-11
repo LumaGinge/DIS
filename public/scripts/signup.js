@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   function fetchUserData() {
-    return fetch('/api/user', {
+    return fetch('/user', {
       method: 'GET',
       credentials: 'include', // Include cookies in the request
     })
