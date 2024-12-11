@@ -47,7 +47,13 @@ router.post('/api/login', (req, res) => {//skal stå/api på droplet
       console.log('Password match. Generating JWT'); // Log successful password match
 
       const token = jwt.sign(
-        { id: user.id, email: user.email, firstName: user.firstName },
+        { 
+          id: user.id, 
+          email: user.email, 
+          firstName: user.firstName, 
+          lastName: user.lastName, 
+          phoneNumber: user.phoneNumber 
+        },
         secretKey,
         { expiresIn: '1h' } // Token valid for 1 hour
       );

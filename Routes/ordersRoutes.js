@@ -1,6 +1,8 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const router = express.Router();
+const authenticateToken = require('../middleware/authenticateToken'); // Import the authentication middleware
+
 
 // Unified database connection
 const db = new sqlite3.Database('./DB/users.db', (err) => {
@@ -170,44 +172,40 @@ router.post('/save-order', (req, res) => {
     );
 });
 
-router.get('/api/get-orders/:userId', (req, res) => {
-  const { userId } = req.params;
-
-  if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
-  }
+router.get('/get-orders', authenticateToken, (req, res) => {
+  const userId = req.user.id; // Extract userId from the token
 
   db.all(
-      `SELECT o.order_id, o.total_price, oi.product_id, oi.quantity, oi.price, oi.total
-       FROM orders o
-       JOIN order_items oi ON o.order_id = oi.order_id
-       WHERE o.user_id = ?`,
-      [userId],
-      (err, rows) => {
-          if (err) {
-              console.error("Error fetching user orders:", err.message);
-              return res.status(500).json({ error: "Failed to fetch orders." });
-          }
-
-          const orders = rows.reduce((acc, row) => {
-              if (!acc[row.order_id]) {
-                  acc[row.order_id] = {
-                      orderId: row.order_id,
-                      totalPrice: row.total_price,
-                      items: []
-                  };
-              }
-              acc[row.order_id].items.push({
-                  productId: row.product_id,
-                  quantity: row.quantity,
-                  price: row.price,
-                  total: row.total
-              });
-              return acc;
-          }, {});
-
-          res.json(Object.values(orders));
+    `SELECT o.order_id, o.total_price, oi.product_id, oi.quantity, oi.price, oi.total
+     FROM orders o
+     JOIN order_items oi ON o.order_id = oi.order_id
+     WHERE o.user_id = ?`,
+    [userId],
+    (err, rows) => {
+      if (err) {
+        console.error("Error fetching user orders:", err.message);
+        return res.status(500).json({ error: "Failed to fetch orders." });
       }
+
+      const orders = rows.reduce((acc, row) => {
+        if (!acc[row.order_id]) {
+          acc[row.order_id] = {
+            orderId: row.order_id,
+            totalPrice: row.total_price,
+            items: [],
+          };
+        }
+        acc[row.order_id].items.push({
+          productId: row.product_id,
+          quantity: row.quantity,
+          price: row.price,
+          total: row.total,
+        });
+        return acc;
+      }, {});
+
+      res.json(Object.values(orders));
+    }
   );
 });
 
