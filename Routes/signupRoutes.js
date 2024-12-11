@@ -20,7 +20,7 @@ router.post('/signup', async (req, res) => {
 
   try {
     // Hash the password
-    const saltRounds = 10;
+    const saltRounds =process.env.BCRYPT_SALT_ROUNDS;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const query = `INSERT INTO users (firstName, lastName, email, phoneNumber, password) VALUES (?, ?, ?, ?, ?)`;
