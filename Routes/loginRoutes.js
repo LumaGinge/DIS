@@ -9,7 +9,7 @@ const secretKey = process.env.JWT_SECRET; // Secret key for signing JWTs
 const db = new sqlite3.Database('./DB/users.db');
 
 // Login route
-router.post('/login', (req, res) => {
+router.post('api/login', (req, res) => {
   console.log('Received login request with body:', req.body); // Log the request body
 
   const { email, password } = req.body;
