@@ -1,43 +1,31 @@
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('All cookies:', document.cookie); // Log raw cookie string
-
-  // Function to get a cookie by name
-  function getCookie(name) {
-    console.log('All cookies (raw):', document.cookie); // Debug all cookies
-    if (!document.cookie) {
-      console.log('No cookies found.');
-      return null;
-    }
-
-    const cookies = document.cookie.split('; ').filter(Boolean); // Remove empty strings
-    console.log('Parsed cookies array:', cookies);
-
-    for (const cookie of cookies) {
-      const [key, value] = cookie.split('=');
-      console.log(`Checking cookie: ${key} = ${value}`);
-      if (key === name) {
-        try {
-          const decodedValue = decodeURIComponent(value);
-          console.log(`Decoded cookie value for ${name}:`, decodedValue);
-          return JSON.parse(decodedValue); // Parse JSON cookie value
-        } catch (err) {
-          console.error('Error parsing cookie value:', err);
-          return null;
+document.addEventListener('DOMContentLoaded', async () => {
+  function fetchUserData() {
+    return fetch('/api/user', {
+      method: 'GET',
+      credentials: 'include', // Include cookies in the request
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: HTTP ${response.status}`);
         }
-      }
-    }
-
-    console.log(`Cookie ${name} not found.`);
-    return null;
+        return response.json();
+      })
+      .then(data => {
+        console.log('User data from server:', data.user); // Log user data
+        return data.user;
+      })
+      .catch(err => {
+        console.error('Error fetching user data:', err.message);
+        return null; // Return null if fetching fails
+      });
   }
+  
 
-  // Check if user is logged in
-  const user = getCookie('user'); // Get the 'user' cookie
-  console.log('User from cookie:', user); // Debug: Log the user data
-
-  // Update UI based on login state
+  const user = await fetchUserData(); // Fetch user data from the server
   if (user) {
-    console.log('User is logged in. Updating UI...');
+    console.log('User is logged in:', user);
+
+    // Update UI for logged-in state
     document.getElementById('userInfoContainer').style.display = 'block';
     document.getElementById('registerContainer').style.display = 'none';
 
@@ -45,7 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userEmail').textContent = `Email: ${user.email}`;
     document.getElementById('phone').textContent = `Phone: ${user.phoneNumber || 'Not provided'}`;
   } else {
-    console.log('No user found. Showing registration form...');
+    console.log('No user found. Showing registration form.');
+
+    // Update UI for logged-out state
     document.getElementById('userInfoContainer').style.display = 'none';
     document.getElementById('registerContainer').style.display = 'block';
   }
