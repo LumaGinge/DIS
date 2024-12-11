@@ -9,7 +9,7 @@ const secretKey = process.env.JWT_SECRET; // Secret key for signing JWTs
 const db = new sqlite3.Database('./DB/users.db');
 
 // Login route
-router.post('api/login', (req, res) => {
+router.post('/api/login', (req, res) => {
   console.log('Received login request with body:', req.body); // Log the request body
 
   const { email, password } = req.body;
@@ -116,7 +116,7 @@ router.post('/logout', (req, res) => {
   res.clearCookie('jwtToken', {
     path: '/', // Clear the cookie for all paths
     sameSite: 'Strict',
-    httpOnly: false, // Matches the initial cookie settings
+    httpOnly: true, // Matches the initial cookie settings
   });
   console.log('Cleared JWT cookie'); // Log JWT cookie clearance
 
