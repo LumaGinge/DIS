@@ -2,32 +2,28 @@ const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET;
 
 function authenticateToken(req, res, next) {
-  const token = req.cookies?.jwtToken;
+  console.log('--- Authenticating Token Middleware ---');
+  console.log('Headers:', req.headers);
+  console.log('Cookies:', req.cookies);
 
-  if (!token) {
+  if (!req.cookies || !req.cookies.jwtToken) {
+    console.log('No token found in cookies. Redirecting to login.');
     res.clearCookie('jwtToken', { path: '/' });
     res.clearCookie('user', { path: '/' });
-
-    if (req.originalUrl.startsWith('/api')) {
-      // Send JSON error for API routes
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-    return res.redirect('/static/signup.html');
+    return res.redirect('/static/signup.html'); // Redirect to login page
   }
 
+  const token = req.cookies.jwtToken;
   try {
     const decoded = jwt.verify(token, secretKey);
-    req.user = decoded;
+    console.log('Token verified successfully:', decoded);
+    req.user = decoded; // Attach user info to the request
     next();
   } catch (error) {
     console.error('Invalid or expired token:', error.message);
     res.clearCookie('jwtToken', { path: '/' });
     res.clearCookie('user', { path: '/' });
-
-    if (req.originalUrl.startsWith('/api')) {
-      return res.status(403).json({ message: 'Invalid or expired token' });
-    }
-    return res.redirect('/static/signup.html');
+    return res.redirect('/static/signup.html'); // Redirect to login page
   }
 }
 
