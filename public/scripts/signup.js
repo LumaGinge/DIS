@@ -3,22 +3,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const response = await fetch('/api/user', {
         method: 'GET',
-        credentials: 'include', // Include cookies
+        credentials: 'include', // Include cookies in the request
       });
   
       if (!response.ok) {
-        throw new Error('Failed to fetch user data');
+        throw new Error(`Failed to fetch user data: HTTP ${response.status}`);
       }
   
       const data = await response.json();
-      return data.user; // Decoded user data
+      console.log('User data from server:', data.user);
+      return data.user;
     } catch (error) {
       console.error('Error fetching user data:', error.message);
       return null;
     }
   }
   
-
   const user = await fetchUserData(); // Fetch user data from the server
   if (user) {
     console.log('User is logged in:', user);

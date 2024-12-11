@@ -3,10 +3,18 @@ const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
 const jwt = require('jsonwebtoken'); // Import JWT for token generation
 const sqlite3 = require('sqlite3').verbose();
 require('dotenv').config();
+const authenticateToken = require('../middleware/authenticateToken'); // Import the authentication middleware
 
 const router = express.Router();
 const db = new sqlite3.Database('./DB/users.db'); // Path to user database
 const secretKey = process.env.JWT_SECRET; // Secret key for JWT
+
+router.get('/user', authenticateToken, (req, res) => {
+  // Use `req.user` to return the decoded token data
+  res.json({
+    user: req.user, // Decoded user data
+  });
+});
 
 router.post('/signup', async (req, res) => {
   const { firstName, lastName, email, phoneNumber, password } = req.body;
