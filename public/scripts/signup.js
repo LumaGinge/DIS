@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
   function fetchUserData() {
-    return fetch('/user', {
+    return fetch('/api/user', {
       method: 'GET',
-      credentials: 'include', // Include cookies in the request
+      credentials: 'include', // Include cookies with the request
     })
       .then(response => {
         if (!response.ok) {
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error fetching user data:', err.message);
         return null; // Return null if fetching fails
       });
-  }
+  }  
   
 
   const user = await fetchUserData(); // Fetch user data from the server
