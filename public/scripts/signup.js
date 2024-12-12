@@ -74,104 +74,75 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Logout button not found'); // Debugging
   }
 
-  // Handle signup form submission
-  document.getElementById('registerForm').addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent form from refreshing the page
+  // Handle registration form submission
 
+  document.getElementById('registerForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    // Collect user data
     const countryCode = document.getElementById('countryCode').value;
     const phoneNumber = document.getElementById('phoneNumber').value;
     const fullPhoneNumber = countryCode + phoneNumber;
 
-    const user = {
-      firstName: document.getElementById('firstName').value,
-      lastName: document.getElementById('lastName').value,
-      email: document.getElementById('email').value,
-      phoneNumber: fullPhoneNumber,
-      password: document.getElementById('password').value,
-    };
-
-    console.log('Submitting user data:', user); // Debug log
-
-    // Send OTP using Twilio
-    fetch('/api/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber: fullPhoneNumber }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          console.error('Error sending OTP:', data.error);
-          alert(`Failed to send OTP: ${data.error}`);
-        } else {
-          console.log('OTP sent successfully:', data);
-          document.getElementById('registerContainer').style.display = 'none';
-          document.getElementById('otpContainer').style.display = 'block';
-
-          // Handle OTP verification
-          document.getElementById('otpForm').addEventListener('submit', function (otpEvent) {
-            otpEvent.preventDefault();
-            const otp = document.getElementById('otp').value;
-
-            fetch('/api/verify-otp', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ phoneNumber: fullPhoneNumber, otp }),
-            })
-              .then((response) => response.json())
-              .then((otpData) => {
-                if (otpData.error) {
-                  console.error('Error verifying OTP:', otpData.error);
-                  alert(`Failed to verify OTP: ${otpData.error}`);
-                } else {
-                  console.log('OTP verified successfully:', otpData);
-
-                  // Proceed to signup after successful OTP verification
-                  fetch('/api/signup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(user),
-                  })
-                    .then((signupResponse) => signupResponse.json())
-                    .then((signupData) => {
-                      if (signupData.error) {
-                        console.error('Error during signup:', signupData.error);
-                        alert(`Signup failed: ${signupData.error}`);
-                      } else {
-                        console.log('Signup successful:', signupData);
-
-                        // Set cookies with user data and token
-                        document.cookie = `user=${encodeURIComponent(
-                          JSON.stringify({
-                            firstName: user.firstName,
-                            lastName: user.lastName,
-                            email: user.email,
-                            phoneNumber: user.phoneNumber,
-                          })
-                        )}; path=/; max-age=3600;`;
-
-                        document.cookie = `jwtToken=${signupData.token}; path=/; max-age=3600;`;
-
-                        // Redirect or update UI
-                        window.location.href = '/'; // Reload or redirect to the homepage
-                      }
-                    })
-                    .catch((error) => {
-                      console.error('Signup request failed:', error); // Debug log
-                      alert('Signup request failed. Please try again.');
-                    });
+    try {
+        // Step 1: Send OTP in the background
+        fetch('/api/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phoneNumber: fullPhoneNumber }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to send OTP. Please try again.');
                 }
-              })
-              .catch((error) => {
-                console.error('Error verifying OTP:', error);
-                alert('Failed to verify OTP. Please try again.');
-              });
-          });
+                console.log('OTP sent successfully!');
+            })
+            .catch((error) => {
+                console.error('Error sending OTP:', error.message);
+                alert('Error sending OTP. Please try again.');
+            });
+
+        // Step 2: Prompt user to enter OTP immediately
+        const otp = prompt('Please enter the OTP sent to your phone:');
+        if (!otp) {
+            throw new Error('You must enter an OTP to proceed.');
         }
-      })
-      .catch((error) => {
-        console.error('Error sending OTP:', error); // Debug log
-        alert('Failed to send OTP. Please try again.');
-      });
-  });
+
+        // Step 3: Verify OTP
+        const verifyResponse = await fetch('/api/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phoneNumber: fullPhoneNumber, otp }),
+        });
+
+        if (!verifyResponse.ok) {
+            throw new Error('OTP verification failed. Please try again.');
+        }
+
+        alert('OTP verified successfully! Proceeding with signup.');
+
+        // Step 4: Complete Signup
+        const user = {
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            phoneNumber: fullPhoneNumber,
+            password: document.getElementById('password').value,
+        };
+
+        const signupResponse = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user),
+        });
+
+        if (!signupResponse.ok) {
+            throw new Error('Signup failed. Please try again.');
+        }
+        window.location.href = '/'; // Redirect to homepage
+    } catch (error) {
+        console.error('Error:', error.message);
+        alert(error.message);
+    }
+});
 });

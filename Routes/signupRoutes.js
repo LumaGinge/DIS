@@ -19,84 +19,50 @@ router.get('/user', authenticateToken, (req, res) => {
 router.post('/signup', async (req, res) => {
   const { firstName, lastName, email, phoneNumber, password } = req.body;
 
-  // Log the request body to debug
-  console.log('Request body:', req.body);
-
   if (!firstName || !lastName || !email || !phoneNumber || !password) {
-    return res.status(400).json({ error: 'All fields are required' });
+      return res.status(400).json({ error: 'All fields are required' });
   }
 
   try {
-    // Hash the password
-    const saltRounds =process.env.BCRYPT_SALT_ROUNDS;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+      // Step 1: Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-    const query = `INSERT INTO users (firstName, lastName, email, phoneNumber, password) VALUES (?, ?, ?, ?, ?)`;
+      // Step 2: Insert user into the database
+      const query = `INSERT INTO users (firstName, lastName, email, phoneNumber, password) VALUES (?, ?, ?, ?, ?)`;
+      db.run(query, [firstName, lastName, email, phoneNumber, hashedPassword], function (err) {
+          if (err) {
+              if (err.message.includes('UNIQUE constraint failed')) {
+                  return res.status(400).json({ error: 'Email or phone number already in use' });
+              }
+              console.error(`Database error: ${err.message}`);
+              return res.status(500).json({ error: 'Failed to register user' });
+          }
 
-    db.run(query, [firstName, lastName, email, phoneNumber, hashedPassword], function (err) {
-      if (err) {
-        if (err.message.includes("UNIQUE constraint failed")) {
-          return res.status(400).json({ error: 'Email already in use' });
-        }
-        console.error('Error inserting user into database:', err.message);
-        return res.status(500).json({ error: 'Error registering user' });
-      }
+          // Step 3: Generate JWT token
+          const user = {
+              id: this.lastID,
+              firstName,
+              lastName,
+              email,
+              phoneNumber,
+          };
 
-      console.log('User inserted with ID:', this.lastID); // Log user ID for debugging
+          const token = jwt.sign(user, secretKey, { expiresIn: '1h' });
 
-      // Generate JWT
-      const token = jwt.sign(
-        {
-          id: this.lastID,
-          email,
-          firstName,
-        },
-        secretKey,
-        { expiresIn: '1h' } // Token valid for 1 hour
-      );
+          // Step 4: Set the token as an HttpOnly cookie
+          res.cookie('jwtToken', token, {
+              httpOnly: true, // Prevent JavaScript access
+              secure: process.env.NODE_ENV === 'production', // Use true if HTTPS is enabled
+              sameSite: 'Strict', // Prevent CSRF
+              maxAge: 60 * 60 * 1000, // 1 hour
+          });
 
-      console.log('JWT generated:', token); // Log the generated token
-
-      // Set JWT cookie
-      res.cookie('jwtToken', token, {
-        httpOnly: true, // Allow JavaScript access
-        secure: true, // Use true if HTTPS is enabled
-        maxAge: 60 * 60 * 1000, // 1 hour
-        path: '/', // Cookie is valid for all routes
-        sameSite: 'Lax', // Adjust SameSite policy for your needs
+          console.log(`User registered with ID: ${user.id}`);
+          res.status(201).json({ message: 'Signup successful' });
       });
-
-      // Set user data cookie for UI display
-      res.cookie(
-        'user',
-        JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          phoneNumber,
-        }),
-        {
-          httpOnly: true, // Allow JavaScript access for UI display
-          secure: true, // Use true if HTTPS is enabled
-          maxAge: 60 * 60 * 1000, // 1 hour
-          path: '/', // Cookie is valid for all routes
-          sameSite: 'none', // Allow navigation within the same site
-        }
-      );
-
-      console.log('Cookies set for user and JWT'); // Debug cookie settings
-
-      // Respond with success message
-      res.status(201).json({
-        success: true,
-        message: 'User registered successfully',
-        token: token, // Include the token in the response body
-      });
-    });
   } catch (error) {
-    console.error('Error hashing password:', error.message);
-    res.status(500).json({ error: 'Internal server error' });
+      console.error(`Error during signup: ${error.message}`);
+      res.status(500).json({ error: 'Failed to register user' });
   }
 });
-
 module.exports = router;
