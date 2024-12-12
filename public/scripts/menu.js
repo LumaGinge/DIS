@@ -190,65 +190,63 @@ function fetchAndDisplayProducts() {
         .catch(err => console.error("Error fetching products:", err));
 }
 
-function getUserIdFromCookie() {
-    console.log("Current cookies:", document.cookie); // Debug log for cookies
-    const cookies = document.cookie.split('; ');
-    const userCookie = cookies.find(cookie => cookie.startsWith('user='));
-    if (!userCookie) {
-        console.error("User cookie not found!");
-        return null;
-    }
-
+async function fetchUserData() {
     try {
-        const user = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
-        console.log("Parsed user cookie:", user); // Debug log for parsed user
-        return user.id; // Replace with the correct key for the user ID
-    } catch (err) {
-        console.error("Error parsing user cookie:", err.message);
-        return null;
+        const response = await fetch('/api/user', {
+            method: 'GET',
+            credentials: 'include', // Include HttpOnly cookies in the request
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch user data: HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('User data from server:', data.user);
+        return data.user; // Return the user object
+    } catch (error) {
+        console.error('Error fetching user data:', error.message);
+        return null; // Handle the case where no user data is fetched
     }
 }
-
-
 
 function submitOrder() {
-    const userId = getUserIdFromCookie(); // Fetch the userId dynamically
-    if (!userId) {
-        alert("User not logged in! Cannot place an order.");
-        return;
-    }
-
-    const orderItems = Object.keys(basket).map(productName => {
-        const product = basket[productName];
-        return { productId: product.productId, quantity: product.quantity, price: product.price };
-    });
-
-    const totalPrice = orderItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-
-    // Debugging logs
-    console.log("Order items being sent:", orderItems);
-    console.log("Total Price:", totalPrice);
-    console.log("Submitting order for userId:", userId);
-
-    fetch('/api/save-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, items: orderItems, totalPrice }),
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+    fetchUserData().then(userId => {
+        if (!userId) {
+            alert("User not logged in! Cannot place an order.");
+            return;
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Order saved:", data);
-        alert(`Order saved successfully! Order ID: ${data.orderId}`);
-    })
-    .catch(err => console.error("Error saving order:", err.message));
+
+        const orderItems = Object.keys(basket).map(productName => {
+            const product = basket[productName];
+            return { productId: product.productId, quantity: product.quantity, price: product.price };
+        });
+
+        const totalPrice = orderItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+
+        // Debugging logs
+        console.log("Order items being sent:", orderItems);
+        console.log("Total Price:", totalPrice);
+        console.log("Submitting order for userId:", userId);
+
+        fetch('/api/save-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, items: orderItems, totalPrice }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Order saved:", data);
+                alert(`Order saved successfully! Order ID: ${data.orderId}`);
+            })
+            .catch(err => console.error("Error saving order:", err.message));
+    });
 }
-
-
 
 function fetchProductIdAndAddToBasket(productName, price, quantity) {
     fetch(`/api/products?name=${encodeURIComponent(productName)}`)

@@ -49,27 +49,15 @@ router.get('/products', (req, res) => {
 });
 
 // Endpoint to place an order
-router.post('/place-order', (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-      return res.status(401).json({ error: "Unauthorized: No token provided" });
+router.post('/place-order', authenticateToken, (req, res) => {
+  const userId = req.user.id; // Extract userId from JWT
+  const { orderItems } = req.body;
+
+  if (!orderItems || orderItems.length === 0 || !orderItems.every(item => item.productId && item.quantity)) {
+      return res.status(400).json({ error: "Invalid order data. Include productId and quantity." });
   }
 
-  const token = authHeader.split(' ')[1];
-  jwt.verify(token, secretKey, (err, user) => {
-      if (err) {
-          return res.status(403).json({ error: "Forbidden: Invalid token" });
-      }
-
-      const userId = user.id; // Extract userId from the token
-      const { orderItems } = req.body;
-
-      if (!orderItems || orderItems.length === 0 || !orderItems.every(item => item.productId && item.quantity)) {
-          return res.status(400).json({ error: "Invalid order data. Include productId and quantity." });
-      }
-
-      processOrder(userId, orderItems, res);
-  });
+  processOrder(userId, orderItems, res);
 });
 
 function processOrder(userId, orderItems, res) {
@@ -132,45 +120,47 @@ function processOrder(userId, orderItems, res) {
 }
 
 // Endpoint to save order explicitly
-router.post('/save-order', (req, res) => {
-    const { userId, items, totalPrice } = req.body;
+router.post('/save-order', authenticateToken, (req, res) => {
+  const userId = req.user.id; // Extract userId from JWT
+  const { items, totalPrice } = req.body;
 
-    if (!userId || !items || !items.length || !totalPrice) {
-        return res.status(400).json({ error: 'Invalid order data.' });
-    }
+  if (!items || !items.length || !totalPrice) {
+      return res.status(400).json({ error: 'Invalid order data.' });
+  }
 
-    db.run(
-        `INSERT INTO orders (user_id, total_price) VALUES (?, ?)`,
-        [userId, totalPrice],
-        function (err) {
-            if (err) {
-                console.error("Error inserting order:", err.message);
-                return res.status(500).json({ error: "Failed to save order." });
-            }
+  db.run(
+      `INSERT INTO orders (user_id, total_price) VALUES (?, ?)`,
+      [userId, totalPrice],
+      function (err) {
+          if (err) {
+              console.error("Error inserting order:", err.message);
+              return res.status(500).json({ error: "Failed to save order." });
+          }
 
-            const orderId = this.lastID;
-            console.log("Order inserted with ID:", orderId);
+          const orderId = this.lastID;
+          console.log("Order inserted with ID:", orderId);
 
-            const insertItems = db.prepare(`
-                INSERT INTO order_items (order_id, product_id, quantity, price, total)
-                VALUES (?, ?, ?, ?, ?)
-            `);
+          const insertItems = db.prepare(`
+              INSERT INTO order_items (order_id, product_id, quantity, price, total)
+              VALUES (?, ?, ?, ?, ?)
+          `);
 
-            items.forEach(item => {
-                insertItems.run(orderId, item.productId, item.quantity, item.price, item.quantity * item.price);
-            });
+          items.forEach(item => {
+              insertItems.run(orderId, item.productId, item.quantity, item.price, item.quantity * item.price);
+          });
 
-            insertItems.finalize(err => {
-                if (err) {
-                    console.error("Error finalizing order items:", err.message);
-                    return res.status(500).json({ error: "Failed to save order items." });
-                }
+          insertItems.finalize(err => {
+              if (err) {
+                  console.error("Error finalizing order items:", err.message);
+                  return res.status(500).json({ error: "Failed to save order items." });
+              }
 
-                res.json({ message: 'Order saved successfully', orderId });
-            });
-        }
-    );
+              res.json({ message: 'Order saved successfully', orderId });
+          });
+      }
+  );
 });
+
 
 router.get('/get-orders', authenticateToken, (req, res) => {
   const userId = req.user.id; // Extract the user ID from the verified token
