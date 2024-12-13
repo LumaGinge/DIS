@@ -57,6 +57,20 @@ function fetchAndDisplayOrdersForLoggedInUser() {
       orderHeader.textContent = `Order ID: ${order.orderId}, Total Price: ${order.totalPrice.toFixed(2)} kr`;
       orderDiv.appendChild(orderHeader);
   
+      const locationInfo = document.createElement("p");
+      locationInfo.textContent = `Location: ${order.location}`;
+      orderDiv.appendChild(locationInfo);
+  
+      const pickupTimeInfo = document.createElement("p");
+      const pickupTime = new Date(order.pickupTime);
+      const danishTime = new Intl.DateTimeFormat('da-DK', {
+        dateStyle: 'short',
+        timeStyle: 'medium',
+        timeZone: 'Europe/Copenhagen',
+      }).format(pickupTime);
+      pickupTimeInfo.textContent = `Pickup Time: ${danishTime}`;
+      orderDiv.appendChild(pickupTimeInfo);
+  
       const itemsList = document.createElement("ul");
       order.items.forEach(item => {
         const itemLi = document.createElement("li");
@@ -69,7 +83,7 @@ function fetchAndDisplayOrdersForLoggedInUser() {
       orderDiv.appendChild(itemsList);
       ordersContainer.appendChild(orderDiv);
     });
-  }
+  }  
   
   // Initialize and fetch orders for the logged-in user
   fetchAndDisplayOrdersForLoggedInUser();

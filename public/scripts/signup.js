@@ -23,6 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (user) {
     console.log('User is logged in:', user);
 
+    const signupLink = document.querySelector('a[href="/static/signup.html"]');
+    if (signupLink) {
+      signupLink.textContent = 'Profile';
+      signupLink.href = '/protected/profile'; // Adjust this URL to your actual profile page
+
     // Update UI for logged-in state
     document.getElementById('userInfoContainer').style.display = 'block';
     document.getElementById('registerContainer').style.display = 'none';
@@ -36,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update UI for logged-out state
     document.getElementById('userInfoContainer').style.display = 'none';
     document.getElementById('registerContainer').style.display = 'block';
-  }
+  }}
 
   // Function to log out the user
   function logoutUser() {
@@ -74,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Logout button not found'); // Debugging
   }
 
+  
   // Handle registration form submission
 
   document.getElementById('registerForm').addEventListener('submit', async function (event) {

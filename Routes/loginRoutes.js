@@ -4,111 +4,89 @@ const jwt = require('jsonwebtoken');
 const sqlite3 = require('sqlite3').verbose();
 require('dotenv').config();
 
+
 const router = express.Router();
 const secretKey = process.env.JWT_SECRET; // Secret key for signing JWTs
 const db = new sqlite3.Database('./DB/users.db');
 
-// Login route
-router.post('/login', (req, res) => {//skal stå/api på droplet
-  console.log('Received login request with body:', req.body); // Log the request body
+const twilio = require('twilio');
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = twilio(accountSid, authToken);
 
-  const { email, password } = req.body;
+const verifiedUsers = {}; // Temporary in-memory store for OTP-verified users
 
-  if (!email || !password) {
-    console.log('Missing email or password'); // Debug missing fields
-    return res.status(400).json({ error: 'All fields are required' });
-  }
+router.post('/login', async (req, res) => {
+  const { email, password, otpVerified } = req.body;
 
-  const query = 'SELECT * FROM users WHERE email = ?';
-  console.log('Executing SQL query to find user by email:', email); // Log SQL execution
-
-  db.get(query, [email], async (err, user) => {
-    if (err) {
-      console.error('Database error:', err.message); // Log database error
-      return res.status(500).json({ error: 'Database error' });
+  if (!otpVerified) {
+    // Step 1: Validate email and password
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required.' });
     }
-
-    if (!user) {
-      console.log('User not found for email:', email); // Log user not found
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    console.log('User found:', user); // Log retrieved user data (excluding sensitive info)
 
     try {
-      console.log('Comparing provided password with stored hash'); // Log password comparison start
-      const isMatch = await bcrypt.compare(password, user.password);
+      const query = 'SELECT * FROM users WHERE email = ?';
+      const user = await new Promise((resolve, reject) =>
+        db.get(query, [email], (err, row) => (err ? reject(err) : resolve(row)))
+      );
 
-      if (!isMatch) {
-        console.log('Password mismatch for user:', email); // Log password mismatch
-        return res.status(401).json({ error: 'Invalid password' });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
       }
 
-      console.log('Password match. Generating JWT'); // Log successful password match
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Invalid password.' });
+      }
 
-      const token = jwt.sign(
-        { 
-          id: user.id, 
-          email: user.email, 
-          firstName: user.firstName, 
-          lastName: user.lastName, 
-          phoneNumber: user.phoneNumber 
-        },
-        secretKey,
-        { expiresIn: '1h' } // Token valid for 1 hour
-      );
-
-      console.log('JWT generated:', token); // Log the generated token
-
-      // Setting the user cookie
-      console.log('Setting user cookie'); // Debug before setting the cookie
-      res.cookie(
-        'user',
-        JSON.stringify({
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-        }),
-        {
-          httpOnly: true, // Allow JavaScript access to the cookie
-          secure: true, // Use false if testing locally without HTTPS
-          maxAge: 24 * 60 * 60 * 1000, // 1 day
-          path: '/', // Make cookie available across all routes
-          sameSite: 'Lax', // Prevent cross-site access
-        }
-      );
-      console.log('User cookie set:', JSON.stringify({
+      // Store user details temporarily for OTP verification
+      verifiedUsers[email] = {
+        phoneNumber: user.phoneNumber,
         id: user.id,
+        email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email,
+      };
+
+      res.status(200).json({
+        message: 'Password verified. Please verify OTP.',
         phoneNumber: user.phoneNumber,
-      }));
-
-      // Setting the JWT token as a cookie
-      console.log('Setting JWT cookie'); // Debug before setting the cookie
-      res.cookie('jwtToken', token, {
-        httpOnly: true, // Prevent JavaScript access for better security
-        secure: true, // Use true if deployed over HTTPS
-        maxAge: 60 * 60 * 1000, // 1 hour
-        path: '/', // Make cookie available across all routes
-        sameSite: 'Strict', // Ensure token is not sent with cross-site requests
       });
-      console.log('JWT cookie set:', token);
-
-      // Debugging the cookie headers
-      console.log('Set-Cookie headers:', res.getHeaders()['set-cookie']);
-
-      // Respond with token
-      res.status(200).json({ token });
-      console.log('Login successful for user:', email); // Log successful login
     } catch (error) {
-      console.error('Error during login process:', error.message); // Log unexpected errors
-      res.status(500).json({ error: 'Internal server error' });
+      console.error('Error during login:', error.message);
+      res.status(500).json({ error: 'Internal server error.' });
     }
-  });
+  } else {
+    // Step 2: Issue JWT after OTP verification
+    const user = verifiedUsers[email];
+    if (!user) {
+      return res.status(400).json({ error: 'OTP not verified or session expired.' });
+    }
+
+    delete verifiedUsers[email]; // Clear session after issuing JWT
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.cookie('jwtToken', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict',
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+
+    res.status(200).json({ message: 'Login successful.', token });
+  }
 });
 
 router.post('/logout', (req, res) => {

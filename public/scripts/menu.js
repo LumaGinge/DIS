@@ -211,8 +211,8 @@ async function fetchUserData() {
 }
 
 function submitOrder() {
-    fetchUserData().then(userId => {
-        if (!userId) {
+    fetchUserData().then(user => {
+        if (!user) {
             alert("User not logged in! Cannot place an order.");
             return;
         }
@@ -224,15 +224,31 @@ function submitOrder() {
 
         const totalPrice = orderItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
-        // Debugging logs
-        console.log("Order items being sent:", orderItems);
-        console.log("Total Price:", totalPrice);
-        console.log("Submitting order for userId:", userId);
+        const location = document.getElementById('location').value;
+        const timeOffset = parseInt(document.getElementById('time').value, 10);
 
-        fetch('/api/save-order', {
+        // Calculate and format the pickup time for Danish time zone
+        const pickupTime = new Date();
+        pickupTime.setMinutes(pickupTime.getMinutes() + timeOffset);
+        const danishTime = new Intl.DateTimeFormat('da-DK', {
+            dateStyle: 'short',
+            timeStyle: 'medium',
+            timeZone: 'Europe/Copenhagen',
+        }).format(pickupTime);
+
+        const orderData = {
+            orderItems,
+            totalPrice,
+            location,
+            pickupTime: pickupTime.toISOString(), // Send in ISO format for the backend
+        };
+
+        console.log(`Pickup Time (Danish Time): ${danishTime}`);
+
+        fetch('/api/place-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, items: orderItems, totalPrice }),
+            body: JSON.stringify(orderData),
         })
             .then(response => {
                 if (!response.ok) {
@@ -241,10 +257,13 @@ function submitOrder() {
                 return response.json();
             })
             .then(data => {
-                console.log("Order saved:", data);
-                alert(`Order saved successfully! Order ID: ${data.orderId}`);
+                console.log("Order placed successfully:", data);
+                alert(`Order placed successfully! Order ID: ${data.orderId}\nPickup Time: ${danishTime}`);
             })
-            .catch(err => console.error("Error saving order:", err.message));
+            .catch(err => {
+                console.error("Error placing order:", err.message);
+                alert("Error placing order. Please try again.");
+            });
     });
 }
 
