@@ -31,21 +31,29 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
-router.post("/verify-otp", async (req, res) => {
+router.post('/verify-otp', async (req, res) => {
   const { phoneNumber, otp } = req.body;
+
+  if (!phoneNumber || !otp) {
+      return res.status(400).json({ error: 'Phone number and OTP are required.' });
+  }
+
+  console.log('Verifying OTP for:', phoneNumber);
 
   try {
       const verificationCheck = await client.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
           .verificationChecks.create({ to: phoneNumber, code: otp });
 
-      if (verificationCheck.status === "approved") {
-          res.status(200).json({ message: "OTP verified successfully" });
+      if (verificationCheck.status === 'approved') {
+          console.log('OTP verified successfully.');
+          return res.status(200).json({ message: 'OTP verified successfully.' });
       } else {
-          res.status(400).json({ error: "Invalid OTP" });
+          console.log('Invalid OTP:', verificationCheck);
+          return res.status(400).json({ error: 'Invalid OTP.' });
       }
   } catch (error) {
-      console.error(`Failed to verify OTP: ${error.message}`);
-      res.status(500).json({ error: "Failed to verify OTP" });
+      console.error('Error verifying OTP:', error.message);
+      res.status(500).json({ error: 'Failed to verify OTP.' });
   }
 });
 

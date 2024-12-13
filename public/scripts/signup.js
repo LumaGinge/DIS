@@ -23,10 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (user) {
     console.log('User is logged in:', user);
 
-    const signupLink = document.querySelector('a[href="/static/signup.html"]');
-    if (signupLink) {
-      signupLink.textContent = 'Profile';
-      signupLink.href = '/protected/profile'; // Adjust this URL to your actual profile page
+    
 
     // Update UI for logged-in state
     document.getElementById('userInfoContainer').style.display = 'block';
@@ -41,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update UI for logged-out state
     document.getElementById('userInfoContainer').style.display = 'none';
     document.getElementById('registerContainer').style.display = 'block';
-  }}
+  }
 
   // Function to log out the user
   function logoutUser() {
