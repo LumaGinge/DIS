@@ -23,8 +23,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (user) {
     console.log('User is logged in:', user);
 
-    
-
     // Update UI for logged-in state
     document.getElementById('userInfoContainer').style.display = 'block';
     document.getElementById('registerContainer').style.display = 'none';
