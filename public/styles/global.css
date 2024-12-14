@@ -73,3 +73,17 @@ ul {
   background-color: #f7c1d9;
   font-weight: bold;
 }
+
+#locations-page {
+  background: linear-gradient(to bottom, rgb(240, 155, 193), white);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#locations-page h1 {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 2em;
+  color: #333;
+}

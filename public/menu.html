@@ -20,38 +20,45 @@
         <li style="float:right"><a href="/protected/orders">Orders</a></li>
         <li style="float:right"><a href="/protected/newsletter">Newsletter</a></li>
         <li style="float:right"><a href="/static/locations.html">Locations</a></li>
-        <li style="float:right"><a href="/protected/menu">Menu</a></li>
     </ul>
-    <div>
-    <div id="basket-details"></div>
-    <label for="time">Select Pickup Time:</label>
-  <select id="time" required>
-    <option value="15">15 minutes</option>
-    <option value="30">30 minutes</option>
-    <option value="60">60 minutes</option>
-  </select>
-  <label for="location">Select Location:</label>
-  <select id="location" required>
-    <option value="Falkoner allé 21, Frederiksberg">Falkoner allé 21, Frederiksberg</option>
-    <option value="Falkoner Alle 21-23, Frederiksberg">Falkoner Alle 21-23, Frederiksberg</option>
-    <option value="Apollovej 33, Vanløse">Apollovej 33, Vanløse</option>
-    <option value="Gl. Kongevej 98, Frederiksberg C">Gl. Kongevej 98, Frederiksberg C</option>
-    <option value="Vesterbrogade 57, Copenhagen V">Vesterbrogade 57, Copenhagen V</option>
-    <option value="Vesterbrogade 2E, Copenhagen V">Vesterbrogade 2E, Copenhagen V</option>
-    <option value="Bernstorffsgade 16, Copenhagen V">Bernstorffsgade 16, Copenhagen V</option>
-    <option value="Kulvej 1, Copenhagen">Kulvej 1, Copenhagen</option>
-    <option value="Bomuldsgade 4, Valby">Bomuldsgade 4, Valby</option>
-    <option value="Kalvebod Brygge 59, 2, Copenhagen V">Kalvebod Brygge 59, 2, Copenhagen V</option>
-    <option value="Islands Brygge 21, København">Islands Brygge 21, København</option>
-    <option value="Østerbrogade 48, Copenhagen E">Østerbrogade 48, Copenhagen E</option>
-    <option value="Østerport Station, København Ø">Østerport Station, København Ø</option>
-  </select>
-</div>
+
+    <div class="container">
+        <div class="box" id="basket-details">
+            <h2>Basket Contents</h2>
+            <!-- Basket items will be displayed here -->
+        </div>
+
+        <div class="box input-container">
+            <label for="time">Select Pickup Time:</label>
+            <select id="time" required>
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">60 minutes</option>
+            </select>
+            <label for="location">Select Location:</label>
+            <select id="location" required>
+                <option value="Falkoner allé 21, Frederiksberg">Falkoner allé 21, Frederiksberg</option>
+                <option value="Falkoner Alle 21-23, Frederiksberg">Falkoner Alle 21-23, Frederiksberg</option>
+                <option value="Apollovej 33, Vanløse">Apollovej 33, Vanløse</option>
+                <option value="Gl. Kongevej 98, Frederiksberg C">Gl. Kongevej 98, Frederiksberg C</option>
+                <option value="Vesterbrogade 57, Copenhagen V">Vesterbrogade 57, Copenhagen V</option>
+                <option value="Vesterbrogade 2E, Copenhagen V">Vesterbrogade 2E, Copenhagen V</option>
+                <option value="Bernstorffsgade 16, Copenhagen V">Bernstorffsgade 16, Copenhagen V</option>
+                <option value="Kulvej 1, Copenhagen">Kulvej 1, Copenhagen</option>
+                <option value="Bomuldsgade 4, Valby">Bomuldsgade 4, Valby</option>
+                <option value="Kalvebod Brygge 59, 2, Copenhagen V">Kalvebod Brygge 59, 2, Copenhagen V</option>
+                <option value="Islands Brygge 21, København">Islands Brygge 21, København</option>
+                <option value="Østerbrogade 48, Copenhagen E">Østerbrogade 48, Copenhagen E</option>
+                <option value="Østerport Station, København Ø">Østerport Station, København Ø</option>
+            </select>
+            <button onclick="submitOrder()">Place Order</button>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="center">
         <!-- Headline -->
         <h2>Our Menu</h2>
-        <button onclick="submitOrder()">Place Order</button>
 
         <div class="sections"></div>
         <div class="productArea">
@@ -60,11 +67,7 @@
         </div>
     </div>
 
-    </div>
-
-
+    <script src="/static/scripts/menu.js"></script>
 </body>
-<script src="/static/scripts/menu.js"></script>
-<script src="/static/scripts/navbar.js" defer></script>
 
 </html>

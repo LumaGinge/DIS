@@ -1,3 +1,11 @@
+/* Add this to the top of public/styles/newsletter.css */
+#newsletter-page {
+  background: linear-gradient(to bottom, rgb(240, 155, 193), white);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
 /* General Form Styling */
 form {
   display: flex;
@@ -6,7 +14,7 @@ form {
   margin: 20px auto;
   max-width: 400px;
   padding: 20px;
-  background-color: white; /* Matches other page sections */
+  background-color: #ffe6f0; /* Light pink color */
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
