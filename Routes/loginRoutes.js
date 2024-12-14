@@ -91,12 +91,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/logout', (req, res) => {
   console.log('Received logout request'); // Debug log for logout
-  res.clearCookie('user', {
-    path: '/', // Clear the cookie for all paths
-    sameSite: 'Lax',
-  });
-  console.log('Cleared user cookie'); // Log user cookie clearance
-
+  
   res.clearCookie('jwtToken', {
     path: '/', // Clear the cookie for all paths
     sameSite: 'Strict',
