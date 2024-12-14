@@ -3,30 +3,34 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
   <link rel="stylesheet" href="/static/styles/global.css">
-  <link rel="stylesheet" href="/static/styles/orders.css">
-  <title>JOE and The Juice</title>
 </head>
 
 <body>
   <ul>
     <li> <img src="https://res.cloudinary.com/dlmwcu9am/image/upload/v1731249042/cdn-example/joelogo.svg" alt="logo" class="joelogo"> </li>
     <li><a href="/" class="active">Home</a></li>
-    <li id="authLink" style="float:right"><a href="/static/signup.html">Signup</a></li>
+    <li style="float:right"><a href="/static/profile.html">Profile</a></li>
     <li style="float:right"><a href="/protected/orders">Orders</a></li>
     <li style="float:right"><a href="/protected/newsletter">Newsletter</a></li>
     <li style="float:right"><a href="/static/locations.html">Locations</a></li>
     <li style="float:right"><a href="/protected/menu">Menu</a></li>
   </ul>
 
-  <div id="orders-container">
-    <!-- Orders will be displayed here -->
+  <div class="center">
+    <!-- User Info Container -->
+    <div id="userInfoContainer" class="container">
+      <h2>Welcome Back!</h2>
+      <p id="name"></p>
+      <p id="userEmail"></p>
+      <p id="phone"></p>
+      <button id="logoutButton">Logout</button>
+    </div>
   </div>
 
+  <script src="/static/scripts/profile.js" defer></script>
 </body>
 
-<script src="/static/scripts/orders.js"></script>
-<script src="/static/scripts/navbar.js" defer></script>
 </html>

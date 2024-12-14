@@ -24,4 +24,9 @@ router.get('/newsletter', authenticateToken, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/newsletter.html'));
 });
 
+router.get('/profile', authenticateToken, (req, res) => { 
+  console.log(req.user ? `Authenticated user: ${req.user.email}` : 'Unauthenticated access');
+  res.sendFile(path.join(__dirname, '../public/profile.html'));
+});
+
 module.exports = router;
