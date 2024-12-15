@@ -6,7 +6,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
   const password = document.getElementById('password').value;
 
   try {
-    // fetch til serveren for at logge ind med email og password
+    // Step 1: Validate email and password
     const loginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -22,7 +22,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
     const loginData = await loginResponse.json();
     const phoneNumber = loginData.phoneNumber; //henter telefonnummer fra login data for at sende OTP
 
-    // otp sendes med twilio til telefonnummeret fra databasen
+    // Step 2: Send OTP
     const otpResponse = await fetch('/api/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -34,13 +34,13 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       alert(`Error: ${errorData.error}`);
       return;
     }
-    // prompt for at indtaste OTP
+    // Step 3: Prompt for OTP and verify
     const otp = prompt('Enter the OTP sent to your phone:');
     if (!otp) {
       alert('You must enter an OTP to proceed.');
       return;
     }
-    // otp verifikation af den indtastede OTP
+
     const verifyResponse = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -53,7 +53,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       return;
     }
 
-    // hvis OTP er verificeret, så logges brugeren
+    // Step 4: Final login call to issue JWT
     const finalLoginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -67,7 +67,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
     }
 
     alert('Login successful!');
-    window.location.href = '/';
+    window.location.href = '/'; // Redirect to the desired page
   } catch (error) {
     console.error('Error:', error.message);
     alert('An error occurred. Please try again.');
