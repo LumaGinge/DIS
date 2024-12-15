@@ -6,7 +6,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
   const password = document.getElementById('password').value;
 
   try {
-    // Step 1: Validate email and password
+    // bruger input værdierne til at tjekke login med databasen
     const loginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -18,11 +18,10 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       alert(`Error: ${errorData.error}`);
       return;
     }
-    //
     const loginData = await loginResponse.json();
-    const phoneNumber = loginData.phoneNumber; //henter telefonnummer fra login data for at sende OTP
+    const phoneNumber = loginData.phoneNumber; //henter telefonnummer fra databasen hvis email og password er korrekt
 
-    // Step 2: Send OTP
+    // telefonnummer bruges til at sende OTP
     const otpResponse = await fetch('/api/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -34,14 +33,14 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       alert(`Error: ${errorData.error}`);
       return;
     }
-    // Step 3: Prompt for OTP and verify
+    // prompt for at indtaste OTP
     const otp = prompt('Enter the OTP sent to your phone:');
     if (!otp) {
       alert('You must enter an OTP to proceed.');
       return;
     }
 
-    const verifyResponse = await fetch('/api/verify-otp', {
+    const verifyResponse = await fetch('/api/verify-otp', { // fetch til serveren for at verificere OTP
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phoneNumber, otp }),
@@ -53,7 +52,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       return;
     }
 
-    // Step 4: Final login call to issue JWT
+    // hvis OTP er verificeret, så kan brugeren logge ind
     const finalLoginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -67,7 +66,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
     }
 
     alert('Login successful!');
-    window.location.href = '/'; // Redirect to the desired page
+    window.location.href = '/';
   } catch (error) {
     console.error('Error:', error.message);
     alert('An error occurred. Please try again.');
