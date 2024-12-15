@@ -5,7 +5,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
   const password = document.getElementById('password').value;
 
   try {
-    // Step 1: Validate email and password
+    // Validering af email og password
     const loginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -21,7 +21,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
     const loginData = await loginResponse.json();
     const phoneNumber = loginData.phoneNumber;
 
-    // Step 2: Send OTP
+    // Sender onetime password til telefonnummeret med Twilio
     const otpResponse = await fetch('/api/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -33,13 +33,13 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       alert(`Error: ${errorData.error}`);
       return;
     }
-    // Step 3: Prompt for OTP and verify
+    // Prompt brugeren til at indtaste OTP 
     const otp = prompt('Enter the OTP sent to your phone:');
     if (!otp) {
       alert('You must enter an OTP to proceed.');
       return;
     }
-
+    // Verificerer OTP med Twilio
     const verifyResponse = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,7 +52,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       return;
     }
 
-    // Step 4: Final login call to issue JWT
+    // Bruger er nu verificeret og kan logge ind og får en JWT
     const finalLoginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -66,7 +66,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
     }
 
     alert('Login successful!');
-    window.location.href = '/'; // Redirect to the desired page
+    window.location.href = '/'; // Redirect til forsiden
   } catch (error) {
     console.error('Error:', error.message);
     alert('An error occurred. Please try again.');
