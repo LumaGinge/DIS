@@ -137,7 +137,7 @@ function addToBasket(productName, price, quantity, productId) { //funktion til a
             alert(`${productName} quantity limited to 10.`);
         }
     } else {
-        basket[productName] = { quantity, price, productId }; // Store productId
+        basket[productName] = { quantity, price, productId }; // Gem productId
     }
 
     calculateTotal();
@@ -277,7 +277,7 @@ function fetchProductIdAndAddToBasket(productName, price, quantity) {
         })
         .then(data => {
             if (data.product_id) {
-                addToBasket(productName, price, quantity, data.product_id); // Add to basket with `product_id`
+                addToBasket(productName, price, quantity, data.product_id); // Tilføj til kurv med produkt ID
             } else {
                 alert(`Product ID not found for ${productName}`);
             }
