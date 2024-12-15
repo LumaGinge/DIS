@@ -63,27 +63,25 @@ select {
   text-decoration: underline;
 }
 
-/* General button styles */
 button {
-  background-color: #f7c1d9; /* Base color */
-  color: black; /* Text color */
+  background-color: #f7c1d9; 
+  color: black; 
   border: none;
   padding: 10px 15px;
   border-radius: 5px;
   font-size: 16px;
   font-weight: bold;
-  cursor: pointer; /* Pointer on hover */
-  transition: all 0.3s ease; /* Smooth transitions */
+  cursor: pointer; 
+  transition: all 0.3s ease; 
 }
 
-/* Hover effect for buttons */
 button:hover {
-  background-color: #f088b7; /* Slightly darker color */
-  transform: scale(1.05); /* Slight enlargement */
+  background-color: #f088b7; 
+  transform: scale(1.05); 
 }
 
-/* Active effect for buttons */
+
 button:active {
-  background-color: #e075a1; /* Even darker color on click */
-  transform: scale(0.95); /* Slight shrink */
+  background-color: #e075a1; 
+  transform: scale(0.95); 
 }
