@@ -1,16 +1,16 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const authLink = document.getElementById('authLink');
+document.addEventListener('DOMContentLoaded', async () => { //venter på at DOM er loaded før den kører koden med async
+  const authLink = document.getElementById('authLink'); //henter elementet med id authLink fra DOM
   if (!authLink) {
     console.error('authLink element not found in the DOM.');
     return;
   }
 
   try {
-    const response = await fetch('/api/user', {
+    const response = await fetch('/api/user', { //Bruger fetch til at hente bruger data fra serveren
       method: 'GET',
-      credentials: 'include', // Include cookies in the request
+      credentials: 'include',
     });
-
+    //Hvis brugeren er logget ind, så vises link til profile, ellers vises link til signup siden
     if (response.ok) {
       const contentType = response.headers.get('Content-Type') || '';
       if (contentType.includes('application/json')) {

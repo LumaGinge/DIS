@@ -1,10 +1,10 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const router = express.Router();
-const authenticateToken = require('../middleware/authenticateToken'); // Import the authentication middleware
+const authenticateToken = require('../middleware/authenticateToken'); 
 
 
-// Unified database connection
+// samler på tværs af tabeller
 const db = new sqlite3.Database('./DB/users.db', (err) => {
     if (err) {
         console.error("Error connecting to database:", err.message);
@@ -13,10 +13,10 @@ const db = new sqlite3.Database('./DB/users.db', (err) => {
     }
 });
 
-// Enable foreign key constraints
+// foreign key tillades
 db.run(`PRAGMA foreign_keys = ON;`);
 
-// Endpoint to fetch products
+// henter produkter fra databasen
 router.get('/products', (req, res) => {
     const productName = req.query.name;
 
@@ -48,7 +48,7 @@ router.get('/products', (req, res) => {
     }
 });
 
-// Endpoint to place an order
+// tillader brugeren at placere en ordre, men dette kræver at brugeren har en gyldig JWT token
 router.post('/place-order', authenticateToken, (req, res) => {
   const userId = req.user.id; // Extract userId from JWT
   const { orderItems, location, pickupTime } = req.body;
@@ -57,17 +57,17 @@ router.post('/place-order', authenticateToken, (req, res) => {
       return res.status(400).json({ error: "Invalid order data. Include productId, quantity, location, and pickup time." });
   }
 
-  const placeholders = orderItems.map(() => '?').join(',');
-  const productIds = orderItems.map(item => item.productId);
-  const quantities = Object.fromEntries(orderItems.map(item => [item.productId, item.quantity]));
+  const placeholders = orderItems.map(() => '?').join(','); // bruges til dynamisk at indsætte værdier i SQL-forespørgslen
+  const productIds = orderItems.map(item => item.productId); // henter produktID'er fra orderItems som bruges til parameter i SQL-forespørgslen
+  const quantities = Object.fromEntries(orderItems.map(item => [item.productId, item.quantity])); // laver et objekt med produktID som nøgle og antal som værdi
 
-  db.all(`SELECT * FROM products WHERE product_id IN (${placeholders})`, productIds, (err, rows) => {
+  db.all(`SELECT * FROM products WHERE product_id IN (${placeholders})`, productIds, (err, rows) => { // henter produkterne fra databasen baseret på produktID
       if (err) {
           console.error("Error fetching products for order:", err.message);
           return res.status(500).json({ error: "Failed to process order." });
       }
 
-      const order = rows.map(product => ({
+      const order = rows.map(product => ({ // laver et array med de nødvendige felter for ordren
           productId: product.product_id,
           productName: product.product_name,
           price: product.price,
@@ -75,7 +75,7 @@ router.post('/place-order', authenticateToken, (req, res) => {
           total: product.price * quantities[product.product_id],
       }));
 
-      const totalOrderPrice = order.reduce((sum, item) => sum + item.total, 0);
+      const totalOrderPrice = order.reduce((sum, item) => sum + item.total, 0); // beregner den samlede pris for ordren
 
       db.run(
           `INSERT INTO orders (user_id, total_price, location, pickup_time) VALUES (?, ?, ?, ?)`,

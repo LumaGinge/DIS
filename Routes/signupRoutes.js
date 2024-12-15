@@ -1,22 +1,21 @@
 const express = require('express');
-const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
-const jwt = require('jsonwebtoken'); // Import JWT for token generation
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const sqlite3 = require('sqlite3').verbose();
 require('dotenv').config();
-const authenticateToken = require('../middleware/authenticateToken'); // Import the authentication middleware
+const authenticateToken = require('../middleware/authenticateToken');
 
 const router = express.Router();
-const db = new sqlite3.Database('./DB/users.db'); // Path to user database
-const secretKey = process.env.JWT_SECRET; // Secret key for JWT
+const db = new sqlite3.Database('./DB/users.db');
+const secretKey = process.env.JWT_SECRET;
 
-router.get('/user', authenticateToken, (req, res) => {
-  // Use `req.user` to return the decoded token data
+router.get('/user', authenticateToken, (req, res) => { //Denne router bruges til at hente brugerens informationer fra JWT token og returnere dem som JSON
   res.json({
-    user: req.user, // Decoded user data
+    user: req.user,
   });
 });
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', async (req, res) => { //Denne router bruges til at oprette en ny bruger i databasen
   const { firstName, lastName, email, phoneNumber, password } = req.body;
 
   if (!firstName || !lastName || !email || !phoneNumber || !password) {
@@ -24,10 +23,10 @@ router.post('/signup', async (req, res) => {
   }
 
   try {
-      // Step 1: Hash the password
+      //Først hasher vi passwordet
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Step 2: Insert user into the database
+      // derefter indsætter vi brugeren i databasen
       const query = `INSERT INTO users (firstName, lastName, email, phoneNumber, password) VALUES (?, ?, ?, ?, ?)`;
       db.run(query, [firstName, lastName, email, phoneNumber, hashedPassword], function (err) {
           if (err) {
@@ -38,7 +37,7 @@ router.post('/signup', async (req, res) => {
               return res.status(500).json({ error: 'Failed to register user' });
           }
 
-          // Step 3: Generate JWT token
+          // så laves der et JWT token
           const user = {
               id: this.lastID,
               firstName,
@@ -47,14 +46,14 @@ router.post('/signup', async (req, res) => {
               phoneNumber,
           };
 
-          const token = jwt.sign(user, secretKey, { expiresIn: '1h' });
+          const token = jwt.sign(user, secretKey, { expiresIn: '1h' }); // den signeres med secretKey og udløber efter 1 time
 
-          // Step 4: Set the token as an HttpOnly cookie
+          // JWT gemmes i en cookie
           res.cookie('jwtToken', token, {
-              httpOnly: true, // Prevent JavaScript access
-              secure: process.env.NODE_ENV === 'production', // Use true if HTTPS is enabled
-              sameSite: 'Strict', // Prevent CSRF
-              maxAge: 60 * 60 * 1000, // 1 hour
+              httpOnly: true, // stopper JavaScript fra at læse cookien
+              secure: true, // gør at cookien kun sendes over HTTPS
+              sameSite: 'Strict', //forebygger CSRF angreb
+              maxAge: 60 * 60 * 1000, // varer i 1 time 
           });
 
           console.log(`User registered with ID: ${user.id}`);

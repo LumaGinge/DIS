@@ -78,18 +78,18 @@ const productList = [
 
 ];
 
-let basket = {}; // Store added products
+let basket = {}; // basket objekt til at gemme produkterne
 
-function displayProducts() {
+function displayProducts() { //viser produkterne på siden
     const productContainer = document.getElementById("product-list");
 
-    productContainer.innerHTML = ""; // Clear previous content
+    productContainer.innerHTML = "";
 
-    productList.forEach((product) => {
+    productList.forEach((product) => { //for hvert produkt i produktlisten element
         const productItem = document.createElement("div");
         productItem.classList.add("product-item");
 
-        const img = document.createElement("img");
+        const img = document.createElement("img"); 
         img.src = product.imgsrc;
         img.alt = product.productName;
 
@@ -99,7 +99,7 @@ function displayProducts() {
         const productPrice = document.createElement("p");
         productPrice.innerText = `Price: ${product.price.toFixed(2)} kr.`;
 
-        const quantityInput = document.createElement("input");
+        const quantityInput = document.createElement("input"); //input felt til at indtaste antal
         quantityInput.type = "number";
         quantityInput.value = 1;
         quantityInput.min = 1;
@@ -112,7 +112,7 @@ function displayProducts() {
         addButton.addEventListener("click", () => {
             const quantity = parseInt(quantityInput.value, 10);
             if (quantity >= 1 && quantity <= 10) {
-                fetchProductIdAndAddToBasket(product.productName, product.price, quantity); // Dynamically fetch `product_id`
+                fetchProductIdAndAddToBasket(product.productName, product.price, quantity); // her tilføjes produktet til kurven med navn, pris og antal
             } else {
                 alert("Please enter a quantity between 1 and 10.");
             }
@@ -129,7 +129,7 @@ function displayProducts() {
 }
 
 
-function addToBasket(productName, price, quantity, productId) {
+function addToBasket(productName, price, quantity, productId) { //funktion til at tilføje produkter til kurven
     if (basket[productName]) {
         basket[productName].quantity += quantity;
         if (basket[productName].quantity > 10) {
@@ -146,7 +146,7 @@ function addToBasket(productName, price, quantity, productId) {
 
 
 
-// Function to calculate and display the total price of the basket
+// funktion til at beregne den samlede pris for produkterne i kurven
 function calculateTotal() {
     let total = 0;
     console.log("Basket Contents:");
@@ -154,16 +154,16 @@ function calculateTotal() {
         console.log(`${item}: x ${basket[item].quantity}, Price per unit = ${basket[item].price.toFixed(2)} kr`);
         total += basket[item].price * basket[item].quantity;
     }
-    console.log(`Total Price: ${total.toFixed(2)} kr`); // Display the total price in the console
+    console.log(`Total Price: ${total.toFixed(2)} kr`); // Total pris for produkterne i kurven
 }
 
-// Function to display the basket contents on the html page
+// funktion til at vise indholdet af kurven
 function displayBasket() {
     const basketContainer = document.getElementById("basket-details");
-    basketContainer.innerHTML = "";  // Clear previous contents
+    basketContainer.innerHTML = "";
     let total = 0;
 
-    const basketTitle = document.createElement("h2"); // Create a title for the basket
+    const basketTitle = document.createElement("h2");
     basketTitle.textContent = "Basket Contents";
     basketContainer.appendChild(basketTitle); 
 
@@ -178,14 +178,14 @@ function displayBasket() {
     totalDisplay.textContent = `Total Price: ${total.toFixed(2)} kr`;
     basketContainer.appendChild(totalDisplay);
 }
-// Call the function to display the products on the page
+// funktion til at hente produkterne fra databasen og vise dem på siden
 displayProducts();
 
 function fetchAndDisplayProducts() {
     fetch('/api/products')
         .then(response => response.json())
         .then(productList => {
-            displayProducts(productList); // Pass the fetched data to displayProducts
+            displayProducts(productList); // produktlisten gives som argument til displayProducts funktionen
         })
         .catch(err => console.error("Error fetching products:", err));
 }
@@ -194,7 +194,7 @@ async function fetchUserData() {
     try {
         const response = await fetch('/api/user', {
             method: 'GET',
-            credentials: 'include', // Include HttpOnly cookies in the request
+            credentials: 'include', //cookie sendes med i requesten
         });
 
         if (!response.ok) {
@@ -203,14 +203,14 @@ async function fetchUserData() {
 
         const data = await response.json();
         console.log('User data from server:', data.user);
-        return data.user; // Return the user object
+        return data.user; 
     } catch (error) {
         console.error('Error fetching user data:', error.message);
-        return null; // Handle the case where no user data is fetched
+        return null;
     }
 }
 
-function submitOrder() {
+function submitOrder() { //funktion til at placere en ordre
     fetchUserData().then(user => {
         if (!user) {
             alert("User not logged in! Cannot place an order.");
@@ -236,16 +236,16 @@ function submitOrder() {
             timeZone: 'Europe/Copenhagen',
         }).format(pickupTime);
 
-        const orderData = {
+        const orderData = { //data til at sende til serveren
             orderItems,
             totalPrice,
             location,
-            pickupTime: pickupTime.toISOString(), // Send in ISO format for the backend
+            pickupTime: pickupTime.toISOString(), // sendes i ISO format
         };
 
         console.log(`Pickup Time (Danish Time): ${danishTime}`);
 
-        fetch('/api/place-order', {
+        fetch('/api/place-order', { //api endpoint til at placere en ordre
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData),

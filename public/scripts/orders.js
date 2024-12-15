@@ -1,9 +1,6 @@
-// orders.js
-
-// Decode JWT function
-function decodeToken(token) {
+function decodeToken(token) { // dekrypterer JWT token
     try {
-      const payload = JSON.parse(atob(token.split('.')[1])); // Decode the token payload
+      const payload = JSON.parse(atob(token.split('.')[1])); // token dekrypteres og payload hentes med brugerens informationer
       return payload;
     } catch (error) {
       console.error("Error decoding token:", error.message);
@@ -11,17 +8,16 @@ function decodeToken(token) {
     }
   }
   
-  /// Fetch and display orders for the logged-in user
+  /// henter og viser brugerens ordrer
 function fetchAndDisplayOrdersForLoggedInUser() {
-    // Fetch orders from the API with credentials included
+    // hent brugerens JWT token fra cookien 
     fetch(`/api/get-orders`, {
       method: 'GET',
-      credentials: 'include', // Ensure cookies are sent automatically
+      credentials: 'include', // sørger for at cookien sendes med i requesten
     })
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
-            // Unauthorized; redirect to login
             alert("Session expired. Please log in again.");
             window.location.href = "/static/login.html";
           }
@@ -30,7 +26,7 @@ function fetchAndDisplayOrdersForLoggedInUser() {
         return response.json();
       })
       .then(orders => {
-        displayOrders(orders); // Display the fetched orders
+        displayOrders(orders); // viser brugerens ordrer
       })
       .catch(err => {
         console.error("Error fetching orders:", err.message);
@@ -41,9 +37,9 @@ function fetchAndDisplayOrdersForLoggedInUser() {
   // Display orders in the DOM
 function displayOrders(orders) {
   const ordersContainer = document.getElementById("orders-container");
-  ordersContainer.innerHTML = ""; // Clear previous content
+  ordersContainer.innerHTML = "";
 
-  if (!orders || orders.length === 0) {
+  if (!orders || orders.length === 0) { // hvis brugeren ikke har nogen ordrer
     const noOrdersDiv = document.createElement("div");
     noOrdersDiv.classList.add("no-orders");
 
@@ -63,12 +59,12 @@ function displayOrders(orders) {
     return;
   }
 
-  // Iterate over each order and create DOM elements
+  // dynamisk html genereres for hver ordre med data fra SQL databasen
   orders.forEach(order => {
     const orderDiv = document.createElement("div");
     orderDiv.classList.add("order");
 
-    const orderHeader = document.createElement("h3");
+    const orderHeader = document.createElement("h3"); 
     orderHeader.textContent = `Order ID: ${order.orderId}, Total Price: ${order.totalPrice.toFixed(2)} kr`;
     orderDiv.appendChild(orderHeader);
 
@@ -99,7 +95,5 @@ function displayOrders(orders) {
     ordersContainer.appendChild(orderDiv);
   });
 } 
-  
-  // Initialize and fetch orders for the logged-in user
   fetchAndDisplayOrdersForLoggedInUser();
   
