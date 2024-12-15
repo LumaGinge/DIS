@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Path to the database file
+
 const dbPath = path.join(__dirname, 'users.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
@@ -12,10 +12,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 db.serialize(() => {
-    // Enable foreign key constraints
+    // tilføj foreign keys
     db.run(`PRAGMA foreign_keys = ON;`);
 
-    // Create the Users table
+
     db.run(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +33,6 @@ db.serialize(() => {
         }
     });
 
-    // Create the Products table
     db.run(`
         CREATE TABLE IF NOT EXISTS products (
             product_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,7 +47,7 @@ db.serialize(() => {
         }
     });
 
-    // Create the Orders table
+    
     db.run(`
         CREATE TABLE IF NOT EXISTS orders (
             order_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,7 +64,7 @@ db.serialize(() => {
         }
     });
 
-    // Create the Order Items table
+   
     db.run(`
         CREATE TABLE IF NOT EXISTS order_items (
             item_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -85,7 +84,7 @@ db.serialize(() => {
         }
     });
 
-    // Insert sample products data (optional)
+    
     const insertProducts = `
         INSERT INTO products (product_name, price) VALUES
         ('Turkey', 75.00),
@@ -113,7 +112,7 @@ db.serialize(() => {
     });
 });
 
-// Close the database connection
+
 db.close((err) => {
     if (err) {
         console.error("Error closing database connection:", err.message);

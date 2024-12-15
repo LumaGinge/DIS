@@ -1,6 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 
-// Connect to the database
+
 let db = new sqlite3.Database('newsletterDB.db', (err) => {
     if (err) {
         console.error(err.message);
@@ -8,7 +8,7 @@ let db = new sqlite3.Database('newsletterDB.db', (err) => {
     console.log('Connected to the newsletterDB database.');
 });
 
-// Create table
+
 db.run(`CREATE TABLE IF NOT EXISTS subscribers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL UNIQUE
@@ -19,7 +19,7 @@ db.run(`CREATE TABLE IF NOT EXISTS subscribers (
     console.log('Table created or already exists.');
 });
 
-// Close the database connection
+
 db.close((err) => {
     if (err) {
         console.error(err.message);

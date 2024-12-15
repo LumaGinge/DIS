@@ -13,7 +13,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
 db.serialize(() => {
     db.run(`PRAGMA foreign_keys = ON;`);
 
-    // Fetch the schema of the orders table
+   
     db.all(`PRAGMA table_info(orders)`, (err, tableInfo) => {
         if (err) {
             console.error("Error checking orders table schema:", err.message);
@@ -23,7 +23,7 @@ db.serialize(() => {
         const columns = tableInfo.map((column) => column.name);
         let tasks = [];
 
-        // Add 'location' column if it does not exist
+       
         if (!columns.includes('location')) {
             tasks.push(new Promise((resolve, reject) => {
                 db.run(`ALTER TABLE orders ADD COLUMN location TEXT NOT NULL DEFAULT ''`, (err) => {
@@ -38,7 +38,7 @@ db.serialize(() => {
             }));
         }
 
-        // Add 'pickup_time' column if it does not exist
+        
         if (!columns.includes('pickup_time')) {
             tasks.push(new Promise((resolve, reject) => {
                 db.run(`ALTER TABLE orders ADD COLUMN pickup_time DATETIME`, (err) => {
@@ -53,7 +53,7 @@ db.serialize(() => {
             }));
         }
 
-        // Wait for all tasks to finish before closing the database
+        
         Promise.all(tasks)
             .then(() => {
                 console.log("All modifications completed.");
