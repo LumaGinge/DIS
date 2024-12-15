@@ -6,7 +6,7 @@ const sqlite3 = require('sqlite3').verbose();
 const nodemailer = require('nodemailer');
 const path = require('path');
 
-// Function to generate a random coupon code
+// Funktion til at generere en tilfældig coupon-kode der sendes i mailen
 function generateCouponCode(length = 8) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let coupon = '';
@@ -16,7 +16,7 @@ function generateCouponCode(length = 8) {
     return coupon;
   }
 
-// Connect to the SQLite database
+// Connect til SQLite database filen newsletterDB.db
 const dbPath = path.join(__dirname, '../DB/newsletterDB.db');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
@@ -26,30 +26,30 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-// Configure Nodemailer transporter
+// function til at sende mailen
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // or 'smtp.mailtrap.io' or other providers
+  service: 'gmail', // Provider der benyttes til at sende mailen
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
 });
 
-// Route to handle subscription requests
+// Rute til at tilmelde sig nyhedsbrevet
 router.post('/subscribe', (req, res) => {
   const { email } = req.body;
 
-  // Insert email into the subscribers table
+  // Indsæt emailen i subscribers tabellen
   const query = `INSERT INTO subscribers (email) VALUES (?)`;
   db.run(query, [email], (err) => {
     if (err) {
       return res.status(400).json({ message: 'Subscription failed. Email may already be subscribed.' });
     }
 
-    // Generate a coupon code for the user
-const couponCode = generateCouponCode(); // Call the function to get the coupon string
+    // Kalder funktion til at lave en coupon-kode
+const couponCode = generateCouponCode(); 
 
-     // Set up email content with a welcome message and coupon code
+     // opretter objekt med mail indstillinger og indhold til mailen
      const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
