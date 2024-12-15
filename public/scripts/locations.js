@@ -14,4 +14,4 @@ async function loadMap() { // asynkron funktion som henter kortet
     }
   }
   
-  document.addEventListener("DOMContentLoaded", loadMap);
+  document.addEventListener("DOMContentLoaded", loadMap); // når DOM er loaded, kør loadMap funktionen

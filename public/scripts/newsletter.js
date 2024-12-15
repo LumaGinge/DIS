@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }); 
 
-  // Function to display messages on the page
+  // Funktion til at vise besked på siden
   function displayMessage(message, type) {
     messageBox.textContent = message; // tag besked fra server og vis i message-box
     messageBox.className = ''; // fjerner alle classes fra message-box
