@@ -227,7 +227,7 @@ function submitOrder() { //funktion til at placere en ordre
         const location = document.getElementById('location').value;
         const timeOffset = parseInt(document.getElementById('time').value, 10);
 
-        // Calculate and format the pickup time for Danish time zone
+        //udregner afhentningstidspunktet baseret på nuværrende tidspunkt og brugerens valgte tid
         const pickupTime = new Date();
         pickupTime.setMinutes(pickupTime.getMinutes() + timeOffset);
         const danishTime = new Intl.DateTimeFormat('da-DK', {
@@ -236,7 +236,7 @@ function submitOrder() { //funktion til at placere en ordre
             timeZone: 'Europe/Copenhagen',
         }).format(pickupTime);
 
-        const orderData = { //data til at sende til serveren
+        const orderData = { //order data sendes til serveren
             orderItems,
             totalPrice,
             location,

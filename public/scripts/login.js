@@ -1,11 +1,12 @@
 document.getElementById('loginform').addEventListener('submit', async (event) => {
   event.preventDefault();
 
+  //henter input værdierne
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
   try {
-    // Step 1: Validate email and password
+    // fetch til serveren for at logge ind med email og password
     const loginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -17,11 +18,11 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       alert(`Error: ${errorData.error}`);
       return;
     }
-
+    //
     const loginData = await loginResponse.json();
-    const phoneNumber = loginData.phoneNumber;
+    const phoneNumber = loginData.phoneNumber; //henter telefonnummer fra login data for at sende OTP
 
-    // Step 2: Send OTP
+    // otp sendes med twilio til telefonnummeret fra databasen
     const otpResponse = await fetch('/api/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -33,13 +34,13 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       alert(`Error: ${errorData.error}`);
       return;
     }
-    // Step 3: Prompt for OTP and verify
+    // prompt for at indtaste OTP
     const otp = prompt('Enter the OTP sent to your phone:');
     if (!otp) {
       alert('You must enter an OTP to proceed.');
       return;
     }
-
+    // otp verifikation af den indtastede OTP
     const verifyResponse = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,7 +53,7 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
       return;
     }
 
-    // Step 4: Final login call to issue JWT
+    // hvis OTP er verificeret, så logges brugeren
     const finalLoginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -66,24 +67,9 @@ document.getElementById('loginform').addEventListener('submit', async (event) =>
     }
 
     alert('Login successful!');
-    window.location.href = '/'; // Redirect to the desired page
+    window.location.href = '/';
   } catch (error) {
     console.error('Error:', error.message);
     alert('An error occurred. Please try again.');
   }
-
-    fetch('/protected/endpoint', {
-      method: 'GET',
-      credentials: 'include',
-    })
-      .then((response) => {
-        if (response.ok) {
-          console.log('User is authenticated');
-        } else {
-          console.log('User is not authenticated');
-        }
-      })
-      .catch((error) => {
-        console.error('Error verifying authentication:', error);
-      });
 });

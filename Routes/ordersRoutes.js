@@ -112,16 +112,16 @@ router.post('/place-order', authenticateToken, (req, res) => {
 });
 
 
-// Endpoint to save order explicitly
+// orderen gemmes i databasen efter at brugeren har bekræftet ordren dette tjekkes også ved hjælp af JWT token
 router.post('/save-order', authenticateToken, (req, res) => {
-  const userId = req.user.id; // Extract userId from JWT
+  const userId = req.user.id;
   const { items, totalPrice } = req.body;
 
   if (!items || !items.length || !totalPrice) {
       return res.status(400).json({ error: 'Invalid order data.' });
   }
 
-  db.run(
+  db.run( // indsætter ordren i orders tabellen
       `INSERT INTO orders (user_id, total_price) VALUES (?, ?)`,
       [userId, totalPrice],
       function (err) {
@@ -130,7 +130,7 @@ router.post('/save-order', authenticateToken, (req, res) => {
               return res.status(500).json({ error: "Failed to save order." });
           }
 
-          const orderId = this.lastID;
+          const orderId = this.lastID; 
           console.log("Order inserted with ID:", orderId);
 
           const insertItems = db.prepare(`
@@ -138,7 +138,7 @@ router.post('/save-order', authenticateToken, (req, res) => {
               VALUES (?, ?, ?, ?, ?)
           `);
 
-          items.forEach(item => {
+          items.forEach(item => { // indsætter hver vare i ordren i order_items tabellen
               insertItems.run(orderId, item.productId, item.quantity, item.price, item.quantity * item.price);
           });
 
@@ -156,7 +156,7 @@ router.post('/save-order', authenticateToken, (req, res) => {
 
 
 router.get('/get-orders', authenticateToken, (req, res) => {
-  const userId = req.user.id; // Extract the user ID from the verified token
+  const userId = req.user.id; // henter brugerens ID fra JWT token og bruger det til at hente brugerens ordrer fra databasen
 
   db.all(
     `SELECT o.order_id, o.total_price, o.location, o.pickup_time, oi.product_id, oi.quantity, oi.price, oi.total
@@ -189,7 +189,7 @@ router.get('/get-orders', authenticateToken, (req, res) => {
         return acc;
       }, {});
 
-      res.json(Object.values(orders)); // Return the structured orders
+      res.json(Object.values(orders)); // returnerer brugerens ordrer som et array
     }
   );
 });
