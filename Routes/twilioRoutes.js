@@ -9,7 +9,7 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 const client = twilio(accountSid, authToken);
 
-
+// endpoint til at sende one-time password (OTP) til brugeren
 router.post('/send-otp', async (req, res) => {
   const { phoneNumber } = req.body;
 
@@ -17,9 +17,9 @@ router.post('/send-otp', async (req, res) => {
       return res.status(400).json({ error: 'Phone number is required.' });
   }
 
-  console.log('Sending OTP to:', phoneNumber);
+  console.log('Sending OTP to:', phoneNumber);//Debugging i konsollen
 
-  try {
+  try {         //benytter Twilio verify til at sende OTP til brugeren
       const verification = await client.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
           .verifications.create({ to: phoneNumber, channel: 'sms' });
 
@@ -31,6 +31,7 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
+// endpoint til at verificere OTP, tager phoneNumber og otp som input i req.body
 router.post('/verify-otp', async (req, res) => {
   const { phoneNumber, otp } = req.body;
 
@@ -39,7 +40,7 @@ router.post('/verify-otp', async (req, res) => {
   }
 
   console.log('Verifying OTP for:', phoneNumber);
-
+//benytter Twilio verify til at verificere OTP for brugeren
   try {
       const verificationCheck = await client.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
           .verificationChecks.create({ to: phoneNumber, code: otp });
